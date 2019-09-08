@@ -272,8 +272,8 @@ idxint init(pwork* w)
 	demat *DeM;
 	spmat *Mat_T;
 	idxint *MtoMt;
-	char fn_1[50];
-	char fn_2[50];
+	char fn_1[80];
+	char fn_2[80];
 
 #ifdef PARALLEL_COMPUTE
 	idxint frame_id;
@@ -290,7 +290,8 @@ idxint init(pwork* w)
     kkt_init(w->KKT->PKPt, w->KKT->PK, w->C);
 
 #if DEBUG > 0
-    dumpSparseMatrix(w->KKT->PKPt, "./data/db/PKPt_solve_init.txt");
+	sprintf(fn_1,"%sdb/PKPt_solve_init.txt",DATA_PATH);
+    dumpSparseMatrix(w->KKT->PKPt, fn_1);
 #endif
 
 
@@ -338,15 +339,15 @@ idxint init(pwork* w)
 //fpga init
 	DeM = (demat *)MALLOC(sizeof(demat)*(w->KKT->PKPt->nnz));
 	/*PRINTTEXT("FPGA LDL MatA/Mat_A GEN \n");
-	sprintf(fn_1, "./data/db/fpga/MatA_sparse_init%02i.txt", 0);
-	sprintf(fn_2, "./data/db/fpga/MatA_init%02i.txt", 0);
+	sprintf(fn_1, "%sdb/fpga/MatA_sparse_init%02i.txt", DATA_PATH,0);
+	sprintf(fn_2, "%sdb/fpga/MatA_init%02i.txt", DATA_PATH,0);
 	Spmat2Demat(w->KKT->PKPt, DeM);
 	dumpSparseMatrix(w->KKT->PKPt, fn_1);
 	dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);*/
 
 	//sparse matrix inverse
-	sprintf(fn_1, "./data/db/fpga/MatA_T_sparse_init%02i.txt", 0);
-	sprintf(fn_2, "./data/db/fpga/MatA_T_init%02i.txt", 0);	
+	sprintf(fn_1, "%sdb/fpga/MatA_T_sparse_init%02i.txt",DATA_PATH,0);
+	sprintf(fn_2, "%sdb/fpga/MatA_T_init%02i.txt",DATA_PATH,0);	
 	MtoMt = MALLOC(w->KKT->PKPt->nnz*sizeof(idxint));
 	Mat_T = transposeSparseMatrix(w->KKT->PKPt, MtoMt);
 	Spmat2Demat(Mat_T, DeM);
@@ -391,9 +392,9 @@ idxint init(pwork* w)
 
 #if DEBUG > 0
         /* DEBUG: store factor */
-		sprintf(fn_1, "./data/db/fpga/MatL_init00.txt");
+		sprintf(fn_1, "%sdb/fpga/MatL_init00.txt",DATA_PATH);
 		dumpSparseMatrix(w->KKT->L, fn_1);
-		sprintf(fn_1, "./data/db/fpga/MatD_init00.txt");
+		sprintf(fn_1, "%sdb/fpga/MatD_init00.txt",DATA_PATH);
 		dumpDenseMatrix_UD(w->KKT->D,w->KKT->PKPt->n,1,fn_1);
 
 #endif
@@ -1269,9 +1270,9 @@ idxint ECOS_solve(pwork* w)
 #endif
 
 #if DEBUG
-    char fn[50];
-	char fn_1[50];
-	char fn_2[50];
+    char fn[80];
+	char fn_1[80];
+	char fn_2[80];
 #endif
 
 #if PROFILING > 0
@@ -1294,15 +1295,16 @@ idxint ECOS_solve(pwork* w)
 #if CTRLC > 0
     init_ctrlc();
 #endif
-
 	/* Initialize solver */
     initcode = init(w);
-
-	//RHS1/2 dump - zho
 #if DEBUG > 0
-	dumpDenseMatrix(w->KKT->RHS1, nK, 1, "./data/db/KKT_RHS1_init.txt");
-	dumpDenseMatrix(w->KKT->RHS2, nK, 1, "./data/db/KKT_RHS2_init.txt");
-	dumpDenseMatrix(w->lambda, w->m, 1, "./data/db/W_lambda_init.txt");
+
+	sprintf(fn_1, "%sdb/KKT_RHS1_init.txt",DATA_PATH);
+	dumpDenseMatrix(w->KKT->RHS1, nK, 1, fn_1);
+	sprintf(fn_1, "%sdb/KKT_RHS2_init.txt",DATA_PATH);
+	dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn_1);
+	sprintf(fn_1, "%sdb/W_lambda_init.txt",DATA_PATH);
+	dumpDenseMatrix(w->lambda, w->m, 1, fn_1);
 #endif
 
 	if( initcode == ECOS_FATAL ){
@@ -1481,7 +1483,7 @@ idxint ECOS_solve(pwork* w)
 		
 #if DEBUG > 0
         /* DEBUG: Store matrix to be factored */
-        sprintf(fn, "./data/db/PKPt_updated_%02i.txt", (int)w->info->iter);
+        sprintf(fn, "%sdb/PKPt_updated_%02i.txt",DATA_PATH, (int)w->info->iter);
         dumpSparseMatrix(w->KKT->PKPt, fn);
 #endif
         /* factor KKT matrix */
@@ -1490,15 +1492,15 @@ idxint ECOS_solve(pwork* w)
 #if DUMP_EN > 0
 		DeM = (demat *)MALLOC(sizeof(demat)*(w->KKT->PKPt->nnz));
 		/*PRINTTEXT("FPGA LDL MatA/Mat_A GEN \n");
-		sprintf(fn_1, "./data/db/fpga/MatA_sparse_iter%02i.txt", (int)w->info->iter);
-		sprintf(fn_2, "./data/db/fpga/MatA_iter%02i.txt", (int)w->info->iter);
+		sprintf(fn_1, "%sdb/fpga/MatA_sparse_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		sprintf(fn_2, "%sdb/fpga/MatA_iter%02i.txt",DATA_PATH, (int)w->info->iter);
 		Spmat2Demat(w->KKT->PKPt, DeM);
 		dumpSparseMatrix(w->KKT->PKPt, fn_1);
 		dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);*/
 
 		//sparse matrix inverse
-		sprintf(fn_1, "./data/db/fpga/MatA_T_sparse_iter%02i.txt", (int)w->info->iter);
-		sprintf(fn_2, "./data/db/fpga/MatA_T_iter%02i.txt", (int)w->info->iter);	
+		sprintf(fn_1, "%sdb/fpga/MatA_T_sparse_iter%02i.txt", DATA_PATH,(int)w->info->iter);
+		sprintf(fn_2, "%sdb/fpga/MatA_T_iter%02i.txt", DATA_PATH,(int)w->info->iter);	
 		MtoMt = MALLOC(w->KKT->PKPt->nnz*sizeof(idxint));
 		Mat_T = transposeSparseMatrix(w->KKT->PKPt, MtoMt);
 		Spmat2Demat(Mat_T, DeM);
@@ -1546,12 +1548,12 @@ idxint ECOS_solve(pwork* w)
 
 #if DEBUG > 0
         /* DEBUG: store factor */
-        sprintf(fn, "./data/db/PKPt_factor_%02i.txt"  , (int)w->info->iter);
+        sprintf(fn, "%sdb/PKPt_factor_%02i.txt"  ,DATA_PATH,(int)w->info->iter);
         dumpSparseMatrix(w->KKT->L, fn);
 
-		sprintf(fn, "./data/db/fpga/MatL_iter%02i.txt", (int)w->info->iter);
+		sprintf(fn, "%sdb/fpga/MatL_iter%02i.txt",DATA_PATH,(int)w->info->iter);
 		dumpSparseMatrix(w->KKT->L, fn);
-		sprintf(fn, "./data/db/fpga/MatD_iter%02i.txt", (int)w->info->iter);
+		sprintf(fn, "%sdb/fpga/MatD_iter%02i.txt",DATA_PATH,(int)w->info->iter);
 		dumpDenseMatrix_UD(w->KKT->D,nK,1,fn);
 
 #endif
@@ -1568,7 +1570,7 @@ idxint ECOS_solve(pwork* w)
 #ifdef PARALLEL_COMPUTE
 		//b1 data dump   ' Ax1=b1 Linear equation solving'
 #if DEBUG > 0
-		sprintf(fn, "./data/db/KKT_RHS1_iter_%02i.txt", (int)w->info->iter);
+		sprintf(fn, "%sdb/KKT_RHS1_iter_%02i.txt",DATA_PATH, (int)w->info->iter);
 		dumpDenseMatrix(w->KKT->RHS1,nK, 1, fn);
 #endif
 
@@ -1594,7 +1596,7 @@ idxint ECOS_solve(pwork* w)
 
 		//b2 data dump   ' Ax2=b2 Linear equation solving'
 #if DEBUG > 0
-		sprintf(fn, "./data/db/KKT_RHS2_iter_%02i.txt", (int)w->info->iter);
+		sprintf(fn, "%s/db/KKT_RHS2_iter_%02i.txt",DATA_PATH, (int)w->info->iter);
 		dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn);
 #endif
 
@@ -1631,7 +1633,7 @@ idxint ECOS_solve(pwork* w)
 
 
 #if DEBUG > 0
-	sprintf(fn, "./data/db/KKT_RHS1_iter_%02i.txt", (int)w->info->iter);
+	sprintf(fn, "%sdb/KKT_RHS1_iter_%02i.txt", DATA_PATH,(int)w->info->iter);
 	dumpDenseMatrix(w->KKT->RHS1,nK, 1, fn);
 #endif
 
@@ -1663,7 +1665,7 @@ idxint ECOS_solve(pwork* w)
 
 		//RHS2 iter_dump - zho
 #if DEBUG > 0
-	sprintf(fn, "./data/db/KKT_RHS2_iter_%02i.txt", (int)w->info->iter);
+	sprintf(fn, "%sdb/KKT_RHS2_iter_%02i.txt",DATA_PATH, (int)w->info->iter);
 	dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn);
 #endif
 

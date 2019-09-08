@@ -24,6 +24,8 @@
 #ifndef __GLBLOPTS_H__
 #define __GLBLOPTS_H__
 
+#define DATA_PATH "../../../data/"
+
 
 
 //#define ZCU102_HW_IMP					//实现平台为zcu102

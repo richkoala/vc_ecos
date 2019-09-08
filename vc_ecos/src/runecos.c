@@ -43,7 +43,11 @@ int main(void)
 	dump_config_int frame_idx=0;
 	FILE *fid_log;
 	dump_config_int log_idx=0;
-	char *file_log_name[50];
+	char *log_name[80];
+	char *log_path[80];
+	char *file_setup[80];
+	char *file_dout[80];
+	char *load_data_file;
 
 	/*char ver[7];*/
     idxint exitflag = ECOS_FATAL;
@@ -70,8 +74,19 @@ int main(void)
 	{
 		log_idx = log_idx + 1;
 		
-		sprintf(file_log_name,"%s_%d%s","./data/log/run",log_idx,".log");
-		fid_log = fopen(file_log_name,"w");
+		
+		sprintf(log_path,"%slog/run",DATA_PATH);
+		sprintf(log_name,"%s_%d%s",log_path,log_idx,".log");
+		fid_log = fopen(log_name,"w");
+		strcpy(load_data_file,DATA_PATH);
+		#if  CONFIG_DATA_LOAD_MODE == 0
+			strcat(load_data_file,"data_load/config_github.txt");
+		#elif  CONFIG_DATA_LOAD_MODE == 2
+			strcat(load_data_file,"data_load/config_lunar.txt");
+		#elif  CONFIG_DATA_LOAD_MODE == 4
+			strcat(load_data_file,"data_load/config_earth.txt");
+		#endif
+
 //*==============CONFIG_DATA_OPT==============*//
 	#if  CONFIG_DATA_LOAD_MODE%2 == 0			//config from the config.txt
 		config_dat_batch_rd(  
@@ -87,13 +102,7 @@ int main(void)
 					Ajc,
 					Air,
 					Apr,
-					#if  CONFIG_DATA_LOAD_MODE == 0
-					"./data/data_load/config_github.txt"
-					#elif  CONFIG_DATA_LOAD_MODE == 2
-					"./data/data_load/config_lunar.txt"
-					#elif  CONFIG_DATA_LOAD_MODE == 4
-					"./data/data_load/config_earth.txt"
-					#endif
+					load_data_file,
 					);
 	#else										//config from the data.h
 		#if   CONFIG_DATA_DUMP_MODE == 0		//do nothing
@@ -119,15 +128,7 @@ int main(void)
 					Air,
 					Apr,
 					A_NNZ_LEN,//A_nnz_len,
-					#if  CONFIG_DATA_LOAD_MODE == 0
-					"./data/data_load/config_github.h"
-					#elif  CONFIG_DATA_LOAD_MODE == 2
-					"./data/data_load/config_lunar.h"
-					#elif  CONFIG_DATA_LOAD_MODE == 4
-					"./data/data_load/config_earth.h"
-					#else
-					"./data/data_load/tmp.h"
-					#endif
+					load_data_file
 					);
 	#elif (CONFIG_DATA_DUMP_MODE == 2) || (CONFIG_DATA_LOAD_MODE%2==1)		//write to the config.txt
 			//ecos setup data save
@@ -148,49 +149,41 @@ int main(void)
 						Air,
 						Apr,
 						A_NNZ_LEN,//A_nnz_len,
-						#if  CONFIG_DATA_LOAD_MODE == 1
-						"./data/data_load/config_github.txt"
-						#elif  CONFIG_DATA_LOAD_MODE == 3
-						"./data/data_load/config_lunar.txt"
-						#elif  CONFIG_DATA_LOAD_MODE == 5
-						"./data/data_load/config_earth_once.txt"
-						#else
-						"./data/data_load/tmp.txt"
-						#endif
+						load_data_file
 						);
 	#endif
 
-	/* set up data */	
-		dumpDenseMatrix_i_UD(&n     ,1           , 1 ,"./data/din/n.txt"       );												
-		dumpDenseMatrix_i_UD(&m     ,1           , 1 ,"./data/din/m.txt"       );											
-		dumpDenseMatrix_i_UD(&p     ,1           , 1 ,"./data/din/p.txt"       );											
-		dumpDenseMatrix_i_UD(&l     ,1           , 1 ,"./data/din/l.txt"       );											
-		dumpDenseMatrix_i_UD(&ncones,1           , 1 ,"./data/din/ncones.txt"  );
-		dumpDenseMatrix_i_UD(q      ,ncones      , 1 ,"./data/din/q.txt"       );
-		dumpDenseMatrix_UD(Gpr      ,G_NNZ_LEN   , 1 ,"./data/din/Gpr.txt"     );
-		dumpDenseMatrix_i_UD(Gjc    ,(n+1)       , 1 ,"./data/din/Gjc.txt"     );
-		dumpDenseMatrix_i_UD(Gir    ,G_NNZ_LEN   , 1 ,"./data/din/Gir.txt"     );
-		dumpDenseMatrix_UD(Apr      ,A_NNZ_LEN   , 1 ,"./data/din/Apr.txt"     );
-		dumpDenseMatrix_i_UD(Ajc    ,(n+1)       , 1 ,"./data/din/Ajc.txt"     );
-		dumpDenseMatrix_i_UD(Air    ,G_NNZ_LEN   , 1 ,"./data/din/Air.txt"     );
-		dumpDenseMatrix_UD(c        ,n           , 1 ,"./data/din/c.txt"       );
-		dumpDenseMatrix_UD(h        ,m           , 1 ,"./data/din/h.txt"       );
-		dumpDenseMatrix_UD(b        ,p           , 1 ,"./data/din/b.txt"       );
+	/* set up data */
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&n     ,1           , 1 ,strcat(file_setup,"/din/n.txt"       ));												
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&m     ,1           , 1 ,strcat(file_setup,"/din/m.txt"       ));											
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&p     ,1           , 1 ,strcat(file_setup,"/din/p.txt"       ));											
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&l     ,1           , 1 ,strcat(file_setup,"/din/l.txt"       ));											
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&ncones,1           , 1 ,strcat(file_setup,"/din/ncones.txt"  ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(q      ,ncones      , 1 ,strcat(file_setup,"/din/q.txt"       ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(Gpr      ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gpr.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Gjc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Gjc.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Gir    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gir.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(Apr      ,A_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Apr.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Ajc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Ajc.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Air    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Air.txt"     ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(c        ,n           , 1 ,strcat(file_setup,"/din/c.txt"       ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(h        ,m           , 1 ,strcat(file_setup,"/din/h.txt"       ));
+		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(b        ,p           , 1 ,strcat(file_setup,"/din/b.txt"       ));
 		/**/
 		mywork = ECOS_setup(n, m, p, l, ncones, q, 0, Gpr, Gjc, Gir, Apr, Ajc, Air, c, h, b);
  
     if( mywork != NULL ){
 	
 		/* solve */	
-			exitflag = ECOS_solve(mywork);
+		exitflag = ECOS_solve(mywork);
     
-			dumpDenseMatrix_UD(mywork->x        , n, 1, "./data/dout/result_x.txt");	
-			dumpDenseMatrix_UD(mywork->y        , p, 1, "./data/dout/result_y.txt");	
-			dumpDenseMatrix_UD(mywork->z        , m, 1, "./data/dout/result_z.txt");	
-			dumpDenseMatrix_UD(mywork->s        , m, 1, "./data/dout/result_s.txt");	
-			dumpDenseMatrix_UD(mywork->lambda   , m, 1, "./data/dout/result_lambda.txt");
-			dumpDenseMatrix_UD(&(mywork->kap)   , 1, 1, "./data/dout/result_kap.txt");
-			dumpDenseMatrix_UD(&(mywork->tau)   , 1, 1, "./data/dout/result_tau.txt");
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->x        , n, 1, strcat(file_dout,"/dout/result_x.txt"	));	
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->y        , p, 1, strcat(file_dout,"/dout/result_y.txt"	));	
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->z        , m, 1, strcat(file_dout,"/dout/result_z.txt"	));	
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->s        , m, 1, strcat(file_dout,"/dout/result_s.txt"	));	
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->lambda   , m, 1, strcat(file_dout,"/dout/result_lambda.txt"));
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(&(mywork->kap)   , 1, 1, strcat(file_dout,"/dout/result_kap.txt"));
+		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(&(mywork->tau)   , 1, 1, strcat(file_dout,"/dout/result_tau.txt"));
 
     	/* test second solve
     	exitflag = ECOS_solve(mywork); */
@@ -298,18 +291,13 @@ int main(void)
 			fprintf(fid_log,"==========================================================\n");
 			fprintf(fid_log,"==========================================================\n");
 			fprintf(fid_log,"\n");
-
 			printf(" mywork->x[0]=%28.18f,mywork->x[1]=%28.18f\n",mywork->x[0],mywork->x[1]);
 
 			fclose(fid_log);
-
-
-
-
-
 		#endif
     	/* clean up memory */
 			ECOS_cleanup(mywork, 0);
+
 		}
         
   }

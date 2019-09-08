@@ -562,6 +562,7 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	pfloat *Lpr;
 	spmat *At, *Gt, *KU;
 	idxint *AtoAt, *GtoGt, *AttoK, *GttoK;
+	char  *fn[80];
 
 #if PROFILING > 0
 	timer tsetup;
@@ -885,7 +886,8 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
     nK = KU->n;
 
 #if DEBUG > 0
-    dumpSparseMatrix(KU, "./data/db/Mat_KU_setup.txt");
+	sprintf(fn, "%sdb/db/Mat_KU_setup.txt",DATA_PATH);
+    dumpSparseMatrix(KU, fn);
 #endif
 #if PRINTLEVEL > 2
     PRINTTEXT("Dimension of KKT matrix: %d\n", (int)nK);
@@ -959,14 +961,19 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	pinv(nK, P, mywork->KKT->Pinv);
 	Pinv = mywork->KKT->Pinv;
 #if DEBUG > 0
-    dumpDenseMatrix_i(P, nK, 1, "./data/db/P.txt");
-    dumpDenseMatrix_i(mywork->KKT->Pinv, nK, 1, "./data/db/PINV.txt");
+	sprintf(fn, "%sdb/P.txt",DATA_PATH);
+    dumpDenseMatrix_i(P, nK, 1, fn);
+	sprintf(fn, "%sdb/PINV.txt",DATA_PATH);
+    dumpDenseMatrix_i(mywork->KKT->Pinv, nK, 1, fn);
 #endif
 	permuteSparseSymmetricMatrix(KU, mywork->KKT->Pinv, mywork->KKT->PKPt, mywork->KKT->PK);
 #if DEBUG > 0
-	dumpSparseMatrix(KU, "./data/db/KU_s0.txt");
-    dumpSparseMatrix(mywork->KKT->PKPt, "./data/db/PKPt_s0.txt");
-	dumpDenseMatrix_i(mywork->KKT->PK, KU->nnz, 1, "./data/db/KKT_PK_s0.txt");
+	sprintf(fn, "%sdb/KU_s0.txt",DATA_PATH);
+	dumpSparseMatrix(KU, fn);
+	sprintf(fn, "%sdb/PKPt_s0.txt",DATA_PATH);
+    dumpSparseMatrix(mywork->KKT->PKPt, fn);
+	sprintf(fn, "%sdb/KKT_PK_s0.txt",DATA_PATH);
+	dumpDenseMatrix_i(mywork->KKT->PK, KU->nnz, 1, fn);
 #endif
 	/* permute sign vector */
     for( i=0; i<nK; i++ ){ mywork->KKT->Sign[Pinv[i]] = Sign[i]; }
@@ -1019,7 +1026,8 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	/* permute KKT matrix - we work on this one from now on */
 	permuteSparseSymmetricMatrix(KU, mywork->KKT->Pinv, mywork->KKT->PKPt, NULL);
 #if DEBUG > 0
-    dumpSparseMatrix(mywork->KKT->PKPt, "./data/db/PKPt_setup.txt");
+	sprintf(fn, "%sdb/PKPt_setup.txt",DATA_PATH);
+    dumpSparseMatrix(mywork->KKT->PKPt,fn);
 #endif
 
 	/* get memory for residuals */
