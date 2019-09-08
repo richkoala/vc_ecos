@@ -49,11 +49,12 @@ int kkt_solve_fpga(
 		ps2pl_sop Sop,
 		devec_struct* x);
 
-int kkt_solve_fpga_p2(
-		devec_struct* b_m2,		//帧格式sop1+b1/b2
+int kkt_solve_fpga_p(
+		double* Pb1,
+		double* Pb2,
+		devec_struct* Pb,		//帧格式sop1+b1/b2
 		int b_len,
-		ps2pl_sop Sop1,
-		ps2pl_sop Sop2,
+		ps2pl_sop Sop,
 		double* x_m2);
 
 //protocol
@@ -85,7 +86,7 @@ int kkt_solve_fpga_p2(
 #define CMDTR_CAL_Vecb_ITER2   	0x01B9
 #define CMDT_CAL_Vecb_ITER12  	0x00BA
 #define CMDT_CAL_Vecb_ITER3   	0x00BB
-#define CMDT_CAL_Vecb_ITER3   	0x01BB
+#define CMDTR_CAL_Vecb_ITER3   	0x01BB
  
 #define CMDT_INFO_MatL_COLNUM 	0x00C0
 #define CMDT_INFO_MatL_T_COLNUM 0x00C1

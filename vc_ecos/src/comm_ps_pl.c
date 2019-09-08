@@ -255,6 +255,70 @@ int kkt_solve_fpga(
 
 }
 
+int kkt_solve_fpga_p(
+		double* Pb1,
+		double* Pb2,
+		devec_struct* Pb,
+		int b_len,
+		ps2pl_sop Sop,
+		devec_struct* Px)
+
+{
+	//帧头参数
+	int i;
+	Pb[0].frame_id_or_cnt 		= Sop.frame_id;
+	Pb[0].frame_len_or_iter_num = Sop.frame_len;
+	Pb[1].frame_id_or_cnt 		= Sop.cnt;
+	Pb[1].frame_len_or_iter_num = Sop.iter_num;
+	for (i=0;i<(b_len/2);i++){
+		Pb[2*i+2].double_data1 = Pb2[i];		//高位地址为Pb2
+		Pb[2*i+3].double_data1 = Pb1[i];		//高位地址为Pb1
+	}
+	
+#ifndef ZCU102_HW_IMP
+	return 2;		
+#elif KKT_SOLVE_PL_PROCESS == 0
+	return 3;
+#else
+	u32 Dma_rx_status;
+	u32 Dma_tx_status;
+	int Dma_rx_len;
+	int Dma_tx_len;
+	int i;
+
+	//读取PL逻辑处理结果
+	//2）正常模式下读取2次x处理结果
+	Dma_rx_len = Sop.frame_len;
+
+	Xil_DCacheInvalidateRange((u32)x, (Dma_rx_len/64+1)*64);
+	Dma_rx_status = XAxiDma_SimpleTransfer(&AxiDma,(u32) Px,Dma_rx_len, XAXIDMA_DEVICE_TO_DMA);
+	if (Dma_rx_status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+	//将sop+b参数由DDR发送至PL逻辑
+
+	Dma_tx_len = Sop.frame_len;
+	Xil_DCacheFlushRange((u32)b, Sop.frame_len);
+	Dma_tx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32) Pb, Dma_tx_len , XAXIDMA_DMA_TO_DEVICE);
+
+	if (Dma_tx_status != XST_SUCCESS)
+		return XST_FAILURE;
+
+	if (Dma_rx_status != XST_SUCCESS)
+		return XST_FAILURE;
+
+	while (!Dma_rx_done ||!Dma_tx_done) {
+			/* NOP */
+	}
+
+	Dma_rx_done = 0;
+	Dma_tx_done = 0;
+
+	return XST_SUCCESS;
+
+#endif
+
+}
 
 
 

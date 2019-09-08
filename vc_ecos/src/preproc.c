@@ -478,6 +478,12 @@ void ECOS_cleanup(pwork* w, idxint keepvars)
     FREE(w->KKT->work4);            /* mywork->KKT->work4 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
     FREE(w->KKT->work5);            /* mywork->KKT->work5 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
     FREE(w->KKT->work6);            /* mywork->KKT->work6 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+	FREE(w->KKT->work1_2);            /* mywork->KKT->work1 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+	FREE(w->KKT->work2_2);            /* mywork->KKT->work2 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+    FREE(w->KKT->work3_2);            /* mywork->KKT->work3 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+    FREE(w->KKT->work4_2);            /* mywork->KKT->work4 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+    FREE(w->KKT->work5_2);            /* mywork->KKT->work5 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
+    FREE(w->KKT->work6_2);            /* mywork->KKT->work6 = (pfloat *)MALLOC(nK*sizeof(pfloat));      */
 	FREE(w->KKT);                   /* mywork->KKT = (kkt *)MALLOC(sizeof(kkt));                      */
 	if (w->A) {
 		FREE(w->AtoK);
@@ -907,6 +913,13 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
     mywork->KKT->work4 = (pfloat *)MALLOC(nK*sizeof(pfloat));
     mywork->KKT->work5 = (pfloat *)MALLOC(nK*sizeof(pfloat));
     mywork->KKT->work6 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+	mywork->KKT->work1_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+	mywork->KKT->work2_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+    mywork->KKT->work3_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+    mywork->KKT->work4_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+    mywork->KKT->work5_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+    mywork->KKT->work6_2 = (pfloat *)MALLOC(nK*sizeof(pfloat));
+
 	mywork->KKT->Flag = (idxint *)MALLOC(nK*sizeof(idxint));
 	mywork->KKT->Pattern = (idxint *)MALLOC(nK*sizeof(idxint));
 	mywork->KKT->Lnz = (idxint *)MALLOC(nK*sizeof(idxint));

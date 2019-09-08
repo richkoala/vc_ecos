@@ -272,6 +272,8 @@ idxint init(pwork* w)
 	demat *DeM;
 	spmat *Mat_T;
 	idxint *MtoMt;
+
+	idxint nitref;
 	char fn_1[80];
 	char fn_2[80];
 
@@ -424,53 +426,58 @@ idxint init(pwork* w)
      * where alphap = inf{ alpha | sbar + alpha*e >= 0 }
 	 */
 
-#if PROFILING > 1
-	tic(&tkktsolve);
-#endif
+//#if PROFILING > 1
+//	tic(&tkktsolve);
+//#endif
+//
+//	frame_id = CMDT_CAL_Vecb_INIT1;	//帧类型设置
+//
+//#if PROFILING == 3
+//	w->info->nitref1 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
+//#else
+//	w->info->nitref1 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,frame_id,0,(int)w->info->iter);
+//#endif
+//
+//
+//#if PROFILING > 1
+//	w->info->tkktsolve += toc(&tkktsolve);
+//#endif
+//
+//	//
+//	 // dual variables
+//	 // solve (yhat,zbar) = arg min ||z||_2^2 such that G'*z + A'*y + c = 0
+//	 
+//	 // we can solve this by
+//	 //
+//	 // [ 0   A'  G' ] [  x   ]     [ -c ]
+//	 // [ A   0   0  ] [ yhat ]  =  [  0 ]
+//	 // [ G   0  -I  ] [ zbar ]     [  0 ]
+//	 //
+//	 // and then take zhat = zbar if alphad < 0, zbar + (1+alphad)*e otherwise
+//	 // where alphad = inf{ alpha | zbar + alpha*e >= 0 }
+//	//
+//
+//	// Solve for RHS [-c; 0; 0] //
+//#if PROFILING > 1
+//	tic(&tkktsolve);
+//#endif
+//
+//	frame_id = CMDT_CAL_Vecb_INIT2;	//帧类型设置
+//
+//#if PROFILING == 3
+//	w->info->nitref2 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
+//#else
+//	w->info->nitref2 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref, frame_id,0,(int)w->info->iter);
+//#endif
+//	
+//#if PROFILING > 1
+//	w->info->tkktsolve += toc(&tkktsolve);
+//#endif
 
-	frame_id = CMDT_CAL_Vecb_INIT1;	//帧类型设置
-
-#if PROFILING == 3
-	w->info->nitref1 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
-#else
-	w->info->nitref1 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,frame_id,0,(int)w->info->iter);
-#endif
-
-
-#if PROFILING > 1
-	w->info->tkktsolve += toc(&tkktsolve);
-#endif
-
-	/*
-	 * dual variables
-	 * solve (yhat,zbar) = arg min ||z||_2^2 such that G'*z + A'*y + c = 0
-	 *
-	 * we can solve this by
-	 *
-	 * [ 0   A'  G' ] [  x   ]     [ -c ]
-	 * [ A   0   0  ] [ yhat ]  =  [  0 ]
-	 * [ G   0  -I  ] [ zbar ]     [  0 ]
-	 *
-	 * and then take zhat = zbar if alphad < 0, zbar + (1+alphad)*e otherwise
-	 * where alphad = inf{ alpha | zbar + alpha*e >= 0 }
-	 */
-
-	/* Solve for RHS [-c; 0; 0] */
-#if PROFILING > 1
-	tic(&tkktsolve);
-#endif
-
-	frame_id = CMDT_CAL_Vecb_INIT2;	//帧类型设置
-
-#if PROFILING == 3
-	w->info->nitref2 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
-#else
-	w->info->nitref2 = kkt_solve(w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref, frame_id,0,(int)w->info->iter);
-#endif
-	
-#if PROFILING > 1
-	w->info->tkktsolve += toc(&tkktsolve);
-#endif
+	frame_id = CMDT_CAL_Vecb_INIT12;
+	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
+	w->info->nitref1 = (nitref & 0xFFFF0000)>>16;
+	w->info->nitref2 = nitref & 0xFFFF; 
 
 
 #if DEBUG > 0
@@ -1249,6 +1256,7 @@ idxint ECOS_solve(pwork* w)
 	idxint exitcode = ECOS_FATAL, interrupted = 0;
 	pfloat pres_prev = (pfloat)ECOS_NAN;
 	idxint nK= w->n + w->p + w->m;
+	idxint nitref;
 
 	demat *DeM;
 	spmat *Mat_T;
@@ -1576,7 +1584,7 @@ idxint ECOS_solve(pwork* w)
 
 		/* AFFINE SEARCH DIRECTION (predictor, need dsaff and dzaff only) */
 		RHS_affine(w);
-
+/*
 #if PROFILING > 1
 		tic(&tkktsolve);
 #endif
@@ -1593,13 +1601,13 @@ idxint ECOS_solve(pwork* w)
 #if PROFILING > 1
 		w->info->tkktsolve += toc(&tkktsolve);
 #endif
-
+*/
 		//b2 data dump   ' Ax2=b2 Linear equation solving'
-#if DEBUG > 0
-		sprintf(fn, "%s/db/KKT_RHS2_iter_%02i.txt",DATA_PATH, (int)w->info->iter);
-		dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn);
-#endif
-
+  #if DEBUG > 0
+  		sprintf(fn, "%s/db/KKT_RHS2_iter_%02i.txt",DATA_PATH, (int)w->info->iter);
+  		dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn);
+  #endif
+/*
 #if PROFILING > 1
 		tic(&tkktsolve);
 #endif
@@ -1615,6 +1623,13 @@ idxint ECOS_solve(pwork* w)
 #if PROFILING > 1
 		w->info->tkktsolve += toc(&tkktsolve);
 #endif
+*/
+	frame_id = CMDT_CAL_Vecb_ITER12;
+	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,1,(int)w->info->iter);
+	//nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
+	w->info->nitref1 = (nitref & 0xFFFF0000)>>16;
+	w->info->nitref2 = nitref & 0xFFFF; 
+
 
 
 #if DEBUG > 0 && PRINTLEVEL > 3

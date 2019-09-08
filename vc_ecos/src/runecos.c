@@ -47,7 +47,7 @@ int main(void)
 	char *log_path[80];
 	char *file_setup[80];
 	char *file_dout[80];
-	char *load_data_file;
+	char *load_data_file[80];
 
 	/*char ver[7];*/
     idxint exitflag = ECOS_FATAL;

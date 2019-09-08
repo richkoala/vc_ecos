@@ -45,6 +45,14 @@ typedef struct kkt{
     pfloat* work4;   /* workspace needed for factorization        */
     pfloat* work5;   /* workspace needed for factorization        */
     pfloat* work6;   /* workspace needed for factorization        */
+
+	pfloat* work1_2;   /* workspace needed for factorization        */
+	pfloat* work2_2;   /* workspace needed for factorization        */
+	pfloat* work3_2;   /* workspace needed for factorization        */
+    pfloat* work4_2;   /* workspace needed for factorization        */
+    pfloat* work5_2;   /* workspace needed for factorization        */
+    pfloat* work6_2;   /* workspace needed for factorization        */
+
 	pfloat* RHS1;    /* Right hand side 1						  */
 	pfloat* RHS2;    /* Right hand side 2           			  */	
 	pfloat* dx1;     /* search direction of size n				  */
@@ -123,32 +131,32 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta);
  */
 #ifdef PARALLEL_COMPUTE
 
-#if PROFILING == 3
-idxint kkt_solve(kkt* KKT,
-				 spmat* A, spmat* G,
-				 pfloat* Pb,
-				 pfloat* dx, pfloat* dy, pfloat* dz,
-				 idxint n, idxint p, idxint m,
-				 cone* C, idxint isinit,
-				 idxint nitref,
-				 idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,
-				 idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,
-				 idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time,
-				 idxint frame_id,
-				 idxint iter_en , idxint iter_cnt
-				 );
-#else
-idxint kkt_solve(kkt* KKT,
-                 spmat* A, spmat* G,
-                 pfloat* Pb,
-                 pfloat* dx, pfloat* dy, pfloat* dz,
-                 idxint n, idxint p, idxint m,
-                 cone* C,
-                 idxint isinit,
-                 idxint nitref,
-				 idxint frame_id,
-				 idxint iter_en , idxint iter_cnt
-				 );
+	#if PROFILING == 3
+	idxint kkt_solve(kkt* KKT,
+					 spmat* A, spmat* G,
+					 pfloat* Pb,
+					 pfloat* dx, pfloat* dy, pfloat* dz,
+					 idxint n, idxint p, idxint m,
+					 cone* C, idxint isinit,
+					 idxint nitref,
+					 idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,
+					 idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,
+					 idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time,
+					 idxint frame_id,
+					 idxint iter_en , idxint iter_cnt
+					 );
+	#else
+	idxint kkt_solve(kkt* KKT,
+					 spmat* A, spmat* G,
+					 pfloat* Pb,
+					 pfloat* dx, pfloat* dy, pfloat* dz,
+					 idxint n, idxint p, idxint m,
+					 cone* C,
+					 idxint isinit,
+					 idxint nitref,
+					 idxint frame_id,
+					 idxint iter_en , idxint iter_cnt
+					 );
 
 #endif
 
@@ -180,6 +188,23 @@ idxint kkt_solve(kkt* KKT,
 #endif
 
 #endif
+
+#ifdef PARALLEL_COMPUTE
+	#if PROFILING == 3
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id , idxint iter_en ,idxint iter_cnt);
+	#else
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id , idxint iter_en ,idxint iter_cnt);
+	#endif
+
+#else
+
+	#if PROFILING == 3
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time,idxint iter_en , idxint iter_cnt);
+	#else
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref);
+	#endif
+#endif
+
 
 /**
  * Updates the permuted KKT matrix by copying in the new scalings.
