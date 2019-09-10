@@ -76,6 +76,50 @@ int DMA_COMM_TEST()
 #endif
 }
 
+int kkt_sign_fpga(
+		int* Vec_Sign,
+		int* Sign,
+		int  Sign_len
+		)
+{
+
+	//SignÖ¡Í·²ÎÊý
+	Vec_Sign[0] = CMDT_LDL_SIGN;
+	Vec_Sign[1] = (Sign_len+4)*4;
+	Vec_Sign[2] = 0;
+	Vec_Sign[3]	= 0;
+	memcpy(&Vec_Sign[4],Sign,sizeof(int)*Sign_len);
+
+#ifndef ZCU102_HW_IMP 
+	return 2;
+#elif KKT_FACTOR_PL_PROCESS == 0
+	return 3;
+#else
+	u32 Dma_tx_status;
+	int Dma_tx_len;
+
+	//==========================================//
+	//==========KKT send KKT_sign info==========//
+	//==========================================//
+
+	Dma_tx_len = Vec_Sign[1];	//int32 4B
+	Xil_DCacheFlushRange((u32)Vec_Sign, Dma_tx_len);
+	Dma_tx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32)Vec_Sign, Dma_tx_len , XAXIDMA_DMA_TO_DEVICE);
+
+	if (Dma_tx_status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+	while (!Dma_tx_done)
+	{
+	}
+	Dma_tx_done = 0;
+
+	return XST_SUCCESS;
+
+#endif
+}
+
+
 int kkt_factor_fpga(
 		ps2pl_sop Sop,	
 		double dat_eps,

@@ -41,6 +41,8 @@
 /* SPARSE LDL LIBRARY -------------------------------------------------- */
 #include "ldl.h"
 
+/* FPGA transfer sign data --------------------------------------------- */
+#include "comm_ps_pl.h"
 
 /* CHOOSE RIGHT MEMORY MANAGER ----------------------------------------- */
 #ifdef MATLAB_MEX_FILE
@@ -570,6 +572,12 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	idxint *AtoAt, *GtoGt, *AttoK, *GttoK;
 	char  *fn[80];
 
+	#ifdef PEOC_REORDER_PROTOCAL_SET
+	int		kkt_factor_dma_flag;
+	idxint*	Vec_Sign;
+	#endif
+
+
 #if PROFILING > 0
 	timer tsetup;
 #endif
@@ -990,6 +998,14 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 #endif
 	/* permute sign vector */
     for( i=0; i<nK; i++ ){ mywork->KKT->Sign[Pinv[i]] = Sign[i]; }
+	
+	//一次kkt_factor需要的sign传输处理
+	if (kkt_flag == 0){
+		Vec_Sign = (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
+		kkt_factor_dma_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->L->m));
+		kkt_flag = 1;
+	}
+
 #if PRINTLEVEL > 3
     PRINTTEXT("P = [");
     for( i=0; i<nK; i++ ){ PRINTTEXT("%d ", (int)P[i]); }

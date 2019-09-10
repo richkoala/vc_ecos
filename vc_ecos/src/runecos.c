@@ -37,12 +37,14 @@
 #include "data.h"
 #include "splamm.h"
 
+idxint kkt_flag=0;
+
 int main(void)
 {
 
 	dump_config_int frame_idx=0;
 	FILE *fid_log;
-	dump_config_int log_idx=0;
+	dump_config_int log_idx=0;	
 	char *log_name[80];
 	char *log_path[80];
 	char *file_setup[80];

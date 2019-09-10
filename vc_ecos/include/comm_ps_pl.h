@@ -13,6 +13,8 @@
 	extern volatile u32 success;
 #endif
 
+	extern idxint kkt_flag;
+
 typedef struct ps2pl_sop{
    int frame_id;
    int iter_num;
@@ -29,6 +31,11 @@ typedef struct pl2ps_sop{
 
 int DMA_COMM_TEST();
 
+int kkt_sign_fpga(
+		int* Vec_Sign,
+		int* Sign,
+		int  Sign_len
+		);
 
 int kkt_factor_fpga(
 		ps2pl_sop Sop,	
