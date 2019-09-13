@@ -37,8 +37,6 @@
 #include "data.h"
 #include "splamm.h"
 
-idxint kkt_flag=0;
-
 int main(void)
 {
 
@@ -71,6 +69,9 @@ int main(void)
 	double ldl_dsolve_time;
 	double ldl_ltsolve_time;
 #endif
+
+	kkt_sign_flag  = 0;
+	kkt_factor_flag = 0;
 
 	while(frame_idx<FRAME_NUM)		//²âÊÔ´ÎÊý
 	{
@@ -156,22 +157,23 @@ int main(void)
 	#endif
 
 	/* set up data */
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&n     ,1           , 1 ,strcat(file_setup,"/din/n.txt"       ));												
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&m     ,1           , 1 ,strcat(file_setup,"/din/m.txt"       ));											
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&p     ,1           , 1 ,strcat(file_setup,"/din/p.txt"       ));											
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&l     ,1           , 1 ,strcat(file_setup,"/din/l.txt"       ));											
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(&ncones,1           , 1 ,strcat(file_setup,"/din/ncones.txt"  ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(q      ,ncones      , 1 ,strcat(file_setup,"/din/q.txt"       ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(Gpr      ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gpr.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Gjc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Gjc.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Gir    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gir.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(Apr      ,A_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Apr.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Ajc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Ajc.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_i_UD(Air    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Air.txt"     ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(c        ,n           , 1 ,strcat(file_setup,"/din/c.txt"       ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(h        ,m           , 1 ,strcat(file_setup,"/din/h.txt"       ));
-		strcpy(file_setup,DATA_PATH),		dumpDenseMatrix_UD(b        ,p           , 1 ,strcat(file_setup,"/din/b.txt"       ));
-		/**/
+	#if DEBUG==1 
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(&n     ,1           , 1 ,strcat(file_setup,"/din/n.txt"       ));												
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(&m     ,1           , 1 ,strcat(file_setup,"/din/m.txt"       ));											
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(&p     ,1           , 1 ,strcat(file_setup,"/din/p.txt"       ));											
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(&l     ,1           , 1 ,strcat(file_setup,"/din/l.txt"       ));											
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(&ncones,1           , 1 ,strcat(file_setup,"/din/ncones.txt"  ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(q      ,ncones      , 1 ,strcat(file_setup,"/din/q.txt"       ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_UD(Gpr      ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gpr.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(Gjc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Gjc.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(Gir    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Gir.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_UD(Apr      ,A_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Apr.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(Ajc    ,(n+1)       , 1 ,strcat(file_setup,"/din/Ajc.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_i_UD(Air    ,G_NNZ_LEN   , 1 ,strcat(file_setup,"/din/Air.txt"     ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_UD(c        ,n           , 1 ,strcat(file_setup,"/din/c.txt"       ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_UD(h        ,m           , 1 ,strcat(file_setup,"/din/h.txt"       ));
+		strcpy(file_setup,DATA_PATH);		dumpDenseMatrix_UD(b        ,p           , 1 ,strcat(file_setup,"/din/b.txt"       ));
+	#endif
 		mywork = ECOS_setup(n, m, p, l, ncones, q, 0, Gpr, Gjc, Gir, Apr, Ajc, Air, c, h, b);
  
     if( mywork != NULL ){
@@ -179,14 +181,15 @@ int main(void)
 		/* solve */	
 		exitflag = ECOS_solve(mywork);
     
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->x        , n, 1, strcat(file_dout,"/dout/result_x.txt"	));	
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->y        , p, 1, strcat(file_dout,"/dout/result_y.txt"	));	
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->z        , m, 1, strcat(file_dout,"/dout/result_z.txt"	));	
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->s        , m, 1, strcat(file_dout,"/dout/result_s.txt"	));	
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(mywork->lambda   , m, 1, strcat(file_dout,"/dout/result_lambda.txt"));
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(&(mywork->kap)   , 1, 1, strcat(file_dout,"/dout/result_kap.txt"));
-		strcpy(file_dout,DATA_PATH),		dumpDenseMatrix_UD(&(mywork->tau)   , 1, 1, strcat(file_dout,"/dout/result_tau.txt"));
-
+		//#ifdef DEBUG==1
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(mywork->x        , n, 1, strcat(file_dout,"/dout/result_x.txt"	));	
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(mywork->y        , p, 1, strcat(file_dout,"/dout/result_y.txt"	));	
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(mywork->z        , m, 1, strcat(file_dout,"/dout/result_z.txt"	));	
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(mywork->s        , m, 1, strcat(file_dout,"/dout/result_s.txt"	));	
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(mywork->lambda   , m, 1, strcat(file_dout,"/dout/result_lambda.txt"));
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(&(mywork->kap)   , 1, 1, strcat(file_dout,"/dout/result_kap.txt"));
+		strcpy(file_dout,DATA_PATH);		dumpDenseMatrix_UD(&(mywork->tau)   , 1, 1, strcat(file_dout,"/dout/result_tau.txt"));
+		//#endif
     	/* test second solve
     	exitflag = ECOS_solve(mywork); */
 

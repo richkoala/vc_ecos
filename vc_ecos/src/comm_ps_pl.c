@@ -119,6 +119,93 @@ int kkt_sign_fpga(
 #endif
 }
 
+int kkt_col_cumsum_fpga(
+		int* Vec_Col_cumsum,
+		int* Col_cumsum,
+		int  Col_cumsum_len
+		)
+{
+
+	//Sign帧头参数
+	Vec_Col_cumsum[0] = CMDT_INFO_MatL_COLNUM;
+	Vec_Col_cumsum[1] = (Col_cumsum_len+4)*4;
+	Vec_Col_cumsum[2] = 0;
+	Vec_Col_cumsum[3] = 0;
+	memcpy(&Vec_Col_cumsum[4],Col_cumsum,sizeof(int)*Col_cumsum_len);
+
+#ifndef ZCU102_HW_IMP 
+	return 2;
+#elif KKT_FACTOR_PL_PROCESS == 0
+	return 3;
+#else
+	u32 Dma_tx_status;
+	int Dma_tx_len;
+
+	//==========================================//
+	//==========KKT send KKT_sign info==========//
+	//==========================================//
+
+	Dma_tx_len = Vec_Col_cumsum[1];	//int32 4B
+	Xil_DCacheFlushRange((u32)Col_cumsum, Dma_tx_len);
+	Dma_tx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32)Vec_Col_cumsum, Dma_tx_len , XAXIDMA_DMA_TO_DEVICE);
+
+	if (Dma_tx_status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+	while (!Dma_tx_done)
+	{
+	}
+	Dma_tx_done = 0;
+
+	return XST_SUCCESS;
+
+#endif
+}
+
+int kkt_row_cumsum_fpga(
+		int* Vec_Row_cumsum,
+		int* Row_cumsum,
+		int  Row_cumsum_len
+		)
+{
+
+	//Sign帧头参数
+	Vec_Row_cumsum[0] = CMDT_INFO_MatL_COLNUM;
+	Vec_Row_cumsum[1] = (Row_cumsum_len+4)*4;
+	Vec_Row_cumsum[2] = 0;
+	Vec_Row_cumsum[3] = 0;
+	memcpy(&Vec_Row_cumsum[4],Row_cumsum,sizeof(int)*Row_cumsum_len);
+
+#ifndef ZCU102_HW_IMP 
+	return 2;
+#elif KKT_FACTOR_PL_PROCESS == 0
+	return 3;
+#else
+	u32 Dma_tx_status;
+	int Dma_tx_len;
+
+	//==========================================//
+	//==========KKT send KKT_sign info==========//
+	//==========================================//
+
+	Dma_tx_len = Vec_Row_cumsum[1];	//int32 4B
+	Xil_DCacheFlushRange((u32)Col_cumsum, Dma_tx_len);
+	Dma_tx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32)Vec_Row_cumsum, Dma_tx_len , XAXIDMA_DMA_TO_DEVICE);
+
+	if (Dma_tx_status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+	while (!Dma_tx_done)
+	{
+	}
+	Dma_tx_done = 0;
+
+	return XST_SUCCESS;
+
+#endif
+}
+
+
 
 int kkt_factor_fpga(
 		ps2pl_sop Sop,	

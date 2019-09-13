@@ -37,6 +37,18 @@ int kkt_sign_fpga(
 		int  Sign_len
 		);
 
+int kkt_col_cumsum_fpga(
+		int* Vec_Col_cumsum,
+		int* Col_cumsum,
+		int  Col_cumsum_len
+		);
+
+int kkt_row_cumsum_fpga(
+		int* Vec_Row_cumsum,
+		int* Row_cumsum,
+		int  Row_cumsum_len
+		);
+
 int kkt_factor_fpga(
 		ps2pl_sop Sop,	
 		double dat_eps,
@@ -62,7 +74,7 @@ int kkt_solve_fpga_p(
 		devec_struct* Pb,		//÷°∏Ò Ωsop1+b1/b2
 		int b_len,
 		ps2pl_sop Sop,
-		double* x_m2);
+		devec_struct* Px);
 
 //protocol
 

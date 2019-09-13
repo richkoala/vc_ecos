@@ -157,7 +157,7 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 							LD_nz
 							);
 		//Mat_A
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (frame_id == CMDT_LDL_MatA_INIT || frame_id == CMDT_LDL_MatA_T_INIT || frame_id ==CMDTR_LDL_MatA_INIT || frame_id == CMDTR_LDL_MatA_T_INIT){
 		sprintf(fn_1, "%sdb/fpga/HW_MatA_FRAME_INIT%02i.txt",DATA_PATH, 0);
 		sprintf(fn_2, "%sdb/fpga/HW_SIGN_FRAME_INIT%02i.txt",DATA_PATH, 0);
@@ -271,7 +271,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	#if PROFILING == 3
 
 	LDL_lsolve2(nK, Pb, KKT->L->jc, KKT->L->ir, KKT->L->pr, Px, ldl_lsolve2_cnt,ldl_lsolve2_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_b%i_iter%02i.txt",DATA_PATH,idx_b, iter_cnt);
 		dumpDenseMatrix(Pb,nK, 1, fn);
@@ -288,7 +288,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 
 
 	LDL_dsolve(nK, Px, KKT->D,ldl_dsolve_cnt,ldl_dsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_dx%i_iter%02i.txt",DATA_PATH,idx_b,iter_cnt);
 		dumpDenseMatrix(Px,nK, 1, fn);
@@ -299,7 +299,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	}
 	#endif
 	LDL_ltsolve(nK, Px, KKT->L->jc, KKT->L->ir, KKT->L->pr,ldl_ltsolve_cnt,ldl_ltsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_bx%i_iter%02i.txt",DATA_PATH,idx_b, iter_cnt);
 		dumpDenseMatrix(Px,nK, 1, fn);
@@ -353,7 +353,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			Vec_x);
 
 	#if PROFILING == 3
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,idx_b, 0);
 	else
@@ -702,7 +702,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	#if PROFILING == 3
 
 	LDL_lsolve2(nK, Pb  , KKT->L->jc, KKT->L->ir, KKT->L->pr, Px  , ldl_lsolve2_cnt,ldl_lsolve2_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_b1_iter%02i.txt",DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Pb,nK, 1, fn);
@@ -717,7 +717,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	}
 	#endif
 	LDL_lsolve2(nK, Pb_2, KKT->L->jc, KKT->L->ir, KKT->L->pr, Px_2, ldl_lsolve2_cnt,ldl_lsolve2_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_b2_iter%02i_p.txt" ,DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Pb_2,nK, 1, fn);
@@ -733,7 +733,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	#endif
 
 	LDL_dsolve(nK, Px, KKT->D,ldl_dsolve_cnt,ldl_dsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_dx1_iter%02i.txt",DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Px,nK, 1, fn);
@@ -744,7 +744,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	}
 	#endif
 	LDL_dsolve(nK, Px_2, KKT->D,ldl_dsolve_cnt,ldl_dsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_dx2_iter%02i_p.txt",DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Px_2,nK, 1, fn);
@@ -757,7 +757,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	
 	
 	LDL_ltsolve(nK, Px, KKT->L->jc, KKT->L->ir, KKT->L->pr,ldl_ltsolve_cnt,ldl_ltsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_bx1_iter%02i.txt",DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Px,nK, 1, fn);
@@ -769,7 +769,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	#endif
 	
 	LDL_ltsolve(nK, Px_2, KKT->L->jc, KKT->L->ir, KKT->L->pr,ldl_ltsolve_cnt,ldl_ltsolve_time);
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_bx2_iter%02i_p.txt",DATA_PATH, iter_cnt);
 		dumpDenseMatrix(Px_2,nK, 1, fn);
@@ -822,7 +822,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			Vec_x);
 
 	#if PROFILING == 3
-	#if DUMP_EN == 1
+	#if DEBUG == 1
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/HW_VecPb_FRAME_INIT%02i.txt",DATA_PATH, 0);
 	else

@@ -19,6 +19,10 @@
 
 //n, m, p, l, ncones, q, 0, Gpr, Gjc, Gir, Apr, Ajc, Air, c, h, b
 
+idxint	kkt_sign_flag;
+idxint	kkt_factor_flag;
+
+
 //========github default========//
 #if CONFIG_DATA_LOAD_MODE == 0
 idxint n;

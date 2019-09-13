@@ -266,11 +266,9 @@ void Spmat2Demat_hw_imp(spmat* SpM,demat_struct* DeM, idxint idx)
     }
 }
 
-
-
 void dumpDemat(demat* M, idxint len,char* fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
@@ -290,7 +288,7 @@ void dumpDemat(demat* M, idxint len,char* fn)
 //转化后发送给pl的数据dump处理
 void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len,char* fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
@@ -317,7 +315,7 @@ void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len,char* fn)
 
 void dumpDevec_hw_imp(devec_struct* M, idxint cmd_len, idxint data_len,char* fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
@@ -344,7 +342,7 @@ void dumpDevec_hw_imp(devec_struct* M, idxint cmd_len, idxint data_len,char* fn)
 
 void dumpVecSign_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
@@ -356,7 +354,7 @@ void dumpVecSign_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn)
 			}
 		}
 		for(i=cmd_len; i<cmd_len+data_len; i++){               
-			fprintf(f,"%20.18lf\n", (double)M[i]);
+			fprintf(f,"%08d\n", M[i]);
 		}
         fprintf(f,"%d\t%d\t%20.18e\n", cmd_len+data_len, cmd_len+data_len, 0.0);
 		fclose(f);
@@ -372,7 +370,7 @@ void dumpVecSign_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn)
 /* use LOAD and SPCONVERT to read in the file in MATLAB */
 void dumpSparseMatrix(spmat* M, char* fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
 	idxint j, i, row_strt, row_stop;
     idxint k = 0;
 	FILE *f = fopen(fn,"w");
@@ -404,7 +402,7 @@ void dumpSparseMatrix(spmat* M, char* fn)
  */
 void dumpDenseMatrix(pfloat *M, int dim1, int dim2, char *fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
     FILE *f = fopen(fn,"w");
     int i,j;
     
@@ -427,6 +425,7 @@ void dumpDenseMatrix(pfloat *M, int dim1, int dim2, char *fn)
                 fprintf(f, "%+18.16e\n",M[i]);                
             }                
         }
+		fprintf(f,"%d\t%d\t%20.18e\n", dim1, dim2, 0.0);
         fclose(f);
         printf("Written %d x %d matrix to '%s'.\n",i,dim2,fn);
     } else {
@@ -443,7 +442,7 @@ void dumpDenseMatrix(pfloat *M, int dim1, int dim2, char *fn)
  */
 void dumpDenseMatrix_i(idxint *M, int dim1, int dim2, char *fn)
 {
-#if DUMP_EN == 1
+#if DEBUG == 1
     FILE *f = fopen(fn,"w");
     int i,j;
     
@@ -466,6 +465,7 @@ void dumpDenseMatrix_i(idxint *M, int dim1, int dim2, char *fn)
                 fprintf(f, "%d\n",(int)M[i]);
             }                
         }
+		fprintf(f,"%d\t%d\t%20.18e\n", dim1, dim2, 0.0);
         fclose(f);
         printf("Written %d x %d matrix to '%s'.\n",i,dim2,fn);
     } else {

@@ -2,9 +2,9 @@ clc
 clear all
 close all
 
-path = '../vstudio/run_ecos_v0/run_ecos_v0/db/data_load/';
+path = '../data/db/data_load/';
 
-fid_h  = fopen(strcat(path,'config_earth.h'),'r');
+fid_h    = fopen(strcat(path,'config_earth.h'),'r');
 fid_txt  = fopen(strcat(path,'tmp.txt'),'r');
 
 frame_idx =        1;
