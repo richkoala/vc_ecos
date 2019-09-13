@@ -573,8 +573,18 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	char  *fn[80];
 
 	#ifdef PEOC_REORDER_PROTOCAL_SET
-	int		kkt_factor_dma_flag;
-	idxint*	Vec_Sign;
+	idxint	dma_sign_flag;
+	idxint	dma_col_cumsum_flag;
+	idxint	dma_row_cumsum_flag;
+
+	extern idxint	kkt_sign_flag;
+	extern idxint	kkt_factor_flag;
+	
+	idxint *Vec_Sign;
+	idxint *Vec_Col_cumsum;
+	idxint *Vec_Row_cumsum;
+	spmat	*Mat_Lt;
+	idxint	*LtoLt;
 	#endif
 
 
@@ -586,6 +596,8 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	timer tcreatekkt;
 	timer tmattranspose;
 	timer tordering;
+	pfloat *t1;
+	pfloat *t2;
 #endif
 
 #if PROFILING > 0
@@ -900,7 +912,7 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
     nK = KU->n;
 
 #if DEBUG > 0
-	sprintf(fn, "%sdb/db/Mat_KU_setup.txt",DATA_PATH);
+	sprintf(fn, "%sdb/Mat_KU_setup.txt",DATA_PATH);
     dumpSparseMatrix(KU, fn);
 #endif
 #if PRINTLEVEL > 2
@@ -999,11 +1011,14 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	/* permute sign vector */
     for( i=0; i<nK; i++ ){ mywork->KKT->Sign[Pinv[i]] = Sign[i]; }
 	
-	//一次kkt_factor需要的sign传输处理
-	if (kkt_flag == 0){
-		Vec_Sign = (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
-		kkt_factor_dma_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->L->m));
-		kkt_flag = 1;
+	//
+	if (kkt_sign_flag == 0){
+		Vec_Sign = (idxint *)MALLOC(((mywork->KKT->PKPt->m)+4)*sizeof(idxint));
+		dma_sign_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->PKPt->m));
+		kkt_sign_flag = 1;
+
+		sprintf(fn, "%sdb/fpga/Sign_initial.txt", DATA_PATH);
+		dumpVecSign_hw_imp(Vec_Sign, 1, mywork->KKT->PKPt->m,fn);
 	}
 
 #if PRINTLEVEL > 3
@@ -1047,6 +1062,64 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	Lir = (idxint *)MALLOC(lnz*sizeof(idxint));
 	Lpr = (pfloat *)MALLOC(lnz*sizeof(pfloat));
 	mywork->KKT->L = ecoscreateSparseMatrix(nK, nK, lnz, Ljc, Lir, Lpr);
+
+#ifdef PEOC_REORDER_PROTOCAL_SET
+
+	if (kkt_factor_flag == 0){
+
+	//
+	LDL_numeric2(
+				mywork->KKT->PKPt->n,	/* K and L are n-by-n, where n >= 0 */
+				mywork->KKT->PKPt->jc,	/* input of size n+1, not modified */
+				mywork->KKT->PKPt->ir,	/* input of size nz=Kjc[n], not modified */
+				mywork->KKT->PKPt->pr,	/* input of size nz=Kjc[n], not modified */
+				mywork->KKT->L->jc,	/* input of size n+1, not modified */
+				mywork->KKT->Parent,	/* input of size n, not modified */
+				mywork->KKT->Sign,     /* input, permuted sign vector for regularization */
+                mywork->stgs->eps,     /* input, inverse permutation vector */
+				mywork->stgs->delta,   /* size of dynamic regularization */
+				mywork->KKT->Lnz,		/* output of size n, not defn. on input */
+				mywork->KKT->L->ir,	/* output of size lnz=Lp[n], not defined on input */
+				mywork->KKT->L->pr,	/* output of size lnz=Lp[n], not defined on input */
+				mywork->KKT->D,		/* output of size n, not defined on input */
+				mywork->KKT->work1,	/* workspace of size n, not defn. on input or output */
+				mywork->KKT->Pattern,  /* workspace of size n, not defn. on input or output */
+				mywork->KKT->Flag	    /* workspace of size n, not defn. on input or output */
+	#if PROFILING > 1
+                ,&mywork->info->tfactor_t1, 
+				&mywork->info->tfactor_t2
+	#endif
+    );
+
+	LtoLt	= MALLOC(mywork->KKT->L->nnz*sizeof(idxint));
+	Mat_Lt	= transposeSparseMatrix(mywork->KKT->L, LtoLt);
+	
+	//-MatPKPt_initial-
+	sprintf(fn, "%sdb/fpga/MatPKPt_initial.txt", DATA_PATH);
+	dumpSparseMatrix(mywork->KKT->PKPt, fn);
+
+	//ps->pl  COL_CUMSUM info
+	Vec_Col_cumsum		= (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
+	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m));
+	sprintf(fn, "%sdb/fpga/MatL_initial.txt", DATA_PATH);
+	dumpSparseMatrix(mywork->KKT->L, fn);
+
+	//ps->pl  ROW_CUMSUM info
+	Vec_Row_cumsum		= (idxint *) MALLOC(((Mat_Lt->m)+4)*sizeof(idxint));
+	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Col_cumsum,Mat_Lt->jc,(Mat_Lt->m));
+	sprintf(fn, "%sdb/fpga/MatLt_initial.txt", DATA_PATH);
+	dumpSparseMatrix(Mat_Lt, fn);
+
+	kkt_factor_flag = 1;
+
+	free(LtoLt);
+	free(Mat_Lt);
+
+	}
+
+#endif
+
+
 #if PRINTLEVEL > 2
 	PRINTTEXT("Created Cholesky factor of K in KKT struct\n");
 #endif
@@ -1080,6 +1153,21 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 #if PROFILING > 0
 	mywork->info->tsetup = toc(&tsetup);
 #endif
+
+
+#if DEBUG > 0
+	sprintf(fn, "%sdb/Con_exit/origin_A.txt",DATA_PATH);
+    dumpSparseMatrix(mywork->A,fn);
+	sprintf(fn, "%sdb/Con_exit/origin_G.txt",DATA_PATH);
+    dumpSparseMatrix(mywork->G,fn);
+	sprintf(fn, "%sdb/Con_exit/origin_c.txt",DATA_PATH);
+    dumpDenseMatrix(mywork->c,mywork->n,1,fn);
+	sprintf(fn, "%sdb/Con_exit/origin_b.txt",DATA_PATH);
+    dumpDenseMatrix(mywork->b,mywork->p,1,fn);
+	sprintf(fn, "%sdb/Con_exit/origin_h.txt",DATA_PATH);
+    dumpDenseMatrix(mywork->h,mywork->m,1,fn);
+#endif
+
 
     return mywork;
 }

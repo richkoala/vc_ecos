@@ -1,5 +1,7 @@
-function vector = func_decode_vector(filename,format)
+function [vector,len] = func_decode_vector(filename,format)
     fid = fopen(filename);
-    vector = fscanf(fid,format,inf);
+    tmp = fscanf(fid,format,inf);
+    vector = tmp(1:end-3);
+    len    = tmp(end-2);
     fclose all;
 end

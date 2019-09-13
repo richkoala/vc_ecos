@@ -291,12 +291,6 @@ idxint init(pwork* w)
     /* Initialize KKT matrix */
     kkt_init(w->KKT->PKPt, w->KKT->PK, w->C);
 
-#if DEBUG > 0
-	sprintf(fn_1,"%sdb/PKPt_solve_init.txt",DATA_PATH);
-    dumpSparseMatrix(w->KKT->PKPt, fn_1);
-#endif
-
-
     /* initialize RHS1 */
 	k = 0; j = 0;
 	for( i=0; i<w->n; i++ ){ w->KKT->RHS1[w->KKT->Pinv[k++]] = 0; }
@@ -356,10 +350,14 @@ idxint init(pwork* w)
 //	dumpSparseMatrix(Mat_T, fn_1);
 	dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
 
+	#if DEBUG > 0
+	sprintf(fn_1,"%sdb/PKPt_solve_init.txt",DATA_PATH);
+    dumpSparseMatrix(w->KKT->PKPt, fn_1);
+	#endif
+
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
 	frame_id = CMDTR_LDL_MatA_T_INIT;	//帧类型设置
-
 #if PROFILING == 3
 	tic(&tfactor);
 	KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,w->info->iter);
@@ -398,7 +396,6 @@ idxint init(pwork* w)
 		dumpSparseMatrix(w->KKT->L, fn_1);
 		sprintf(fn_1, "%sdb/fpga/MatD_init00.txt",DATA_PATH);
 		dumpDenseMatrix_UD(w->KKT->D,w->KKT->PKPt->n,1,fn_1);
-
 #endif
 
     /* check if factorization was successful, exit otherwise */
@@ -1319,13 +1316,10 @@ idxint ECOS_solve(pwork* w)
 	/* Initialize solver */
     initcode = init(w);
 #if DEBUG > 0
-
 	sprintf(fn_1, "%sdb/KKT_RHS1_init.txt",DATA_PATH);
 	dumpDenseMatrix(w->KKT->RHS1, nK, 1, fn_1);
 	sprintf(fn_1, "%sdb/KKT_RHS2_init.txt",DATA_PATH);
 	dumpDenseMatrix(w->KKT->RHS2, nK, 1, fn_1);
-	sprintf(fn_1, "%sdb/W_lambda_init.txt",DATA_PATH);
-	dumpDenseMatrix(w->lambda, w->m, 1, fn_1);
 #endif
 
 	if( initcode == ECOS_FATAL ){
@@ -1345,6 +1339,25 @@ idxint ECOS_solve(pwork* w)
 
 		/* Update statistics */
 		updateStatistics(w);
+
+
+#if DEBUG > 0
+        /* DEBUG: Store matrix to be factored */
+        sprintf(fn, "%sdb/Con_exit/x_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(w->x,w->n,1,fn);
+		sprintf(fn, "%sdb/Con_exit/y_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(w->y,w->p,1,fn);
+        sprintf(fn, "%sdb/Con_exit/z_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(w->z,w->m,1,fn);
+		sprintf(fn, "%sdb/Con_exit/s_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(w->s,w->m,1,fn);
+		sprintf(fn, "%sdb/Con_exit/tau_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(&w->tau,1,1,fn);
+		sprintf(fn, "%sdb/Con_exit/kap_iter%02i.txt",DATA_PATH, (int)w->info->iter);
+		dumpDenseMatrix(&w->kap,1,1,fn);
+#endif
+
+
 
 #if PRINTLEVEL > 1
 		/* Print info */
@@ -1510,7 +1523,7 @@ idxint ECOS_solve(pwork* w)
         /* factor KKT matrix */
 
 //fpga iter
-#if DUMP_EN > 0
+#if DEBUG > 0
 		DeM = (demat *)MALLOC(sizeof(demat)*(w->KKT->PKPt->nnz));
 		/*PRINTTEXT("FPGA LDL MatA/Mat_A GEN \n");
 		sprintf(fn_1, "%sdb/fpga/MatA_sparse_iter%02i.txt",DATA_PATH, (int)w->info->iter);
@@ -1527,6 +1540,9 @@ idxint ECOS_solve(pwork* w)
 		Spmat2Demat(Mat_T, DeM);
 //		dumpSparseMatrix(Mat_T, fn_1);
 		dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
+		free(MtoMt);
+		free(Mat_T);
+		free(DeM);
 #endif
 	/**/
 #ifdef PEOC_REORDER_PROTOCAL_SET

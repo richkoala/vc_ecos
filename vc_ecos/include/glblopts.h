@@ -55,12 +55,12 @@
 						   /* 3: HW design reference                     */
 
 /* SET DEBUG LEVEL ----------------------------------------------------- */
-#define DEBUG (1)          /* 0: no debugging information                */
+#define DEBUG (0)          /* 0: no debugging information                */
                            /* 1: debug info & dump intermediate results  */
                            /* (flag used only for development)           */
 
 
-#define DUMP_EN (1)		   /*0 No enable				                 */
+//#define DEBUG (1)		   /*0 No enable				                 */
 						   /*1 enable                                    */
 
 #define CONFIG_DATA_LOAD_MODE  (5)		//0 load config data from config.txt  <github default>
@@ -84,22 +84,6 @@
 	#define G_NNZ_LEN 352				// <Earth Landing>
 	#define A_NNZ_LEN 840								
 #endif
-
-
-#if  ( CONFIG_DATA_LOAD_MODE  == (0) || CONFIG_DATA_LOAD_MODE  == (1) )
-
-#elif( CONFIG_DATA_LOAD_MODE  == (2) || CONFIG_DATA_LOAD_MODE  == (3) )
-
-#elif( CONFIG_DATA_LOAD_MODE  == (4) || CONFIG_DATA_LOAD_MODE  == (5) )
-
-#if (CONEMODE == (1))	
-#define L_NNZ 2974	
-#else
-#define L_NNZ 29	
-#endif
-
-#endif
-/**/
 
 
 #if CONFIG_DATA_LOAD_MODE  == (0)

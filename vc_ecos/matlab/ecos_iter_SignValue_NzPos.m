@@ -6,7 +6,7 @@ close all
 dem = 727;
 iter_num = 11;
 path_sign_data  = '../data/db/fpga/';
-path_kkt_data  = '../data/db/fpga/';
+path_kkt_data   = '../data/db/fpga/';
 
 %% sign参数数值
     sign_data_all = zeros(dem,iter_num);
