@@ -170,7 +170,7 @@ int kkt_row_cumsum_fpga(
 {
 
 	//SignÖ¡Í·²ÎÊý
-	Vec_Row_cumsum[0] = CMDT_INFO_MatL_COLNUM;
+	Vec_Row_cumsum[0] = CMDT_INFO_MatL_T_COLNUM;
 	Vec_Row_cumsum[1] = (Row_cumsum_len+4)*4;
 	Vec_Row_cumsum[2] = 0;
 	Vec_Row_cumsum[3] = 0;

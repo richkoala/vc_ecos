@@ -394,6 +394,8 @@ idxint init(pwork* w)
         /* DEBUG: store factor */
 		sprintf(fn_1, "%sdb/fpga/MatL_init00.txt",DATA_PATH);
 		dumpSparseMatrix(w->KKT->L, fn_1);
+		sprintf(fn_1, "%sdb/fpga/MatL_col_cumsum_init00.txt",DATA_PATH);
+		dumpDenseMatrix_i_UD(w->KKT->L->jc,w->KKT->PKPt->n,1, fn_1);
 		sprintf(fn_1, "%sdb/fpga/MatD_init00.txt",DATA_PATH);
 		dumpDenseMatrix_UD(w->KKT->D,w->KKT->PKPt->n,1,fn_1);
 #endif
@@ -1588,6 +1590,10 @@ idxint ECOS_solve(pwork* w)
 
 		sprintf(fn, "%sdb/fpga/MatL_iter%02i.txt",DATA_PATH,(int)w->info->iter);
 		dumpSparseMatrix(w->KKT->L, fn);
+		sprintf(fn, "%sdb/fpga/MatL_col_cumsum_iter%02i.txt",DATA_PATH,(int)w->info->iter);
+		dumpDenseMatrix_i_UD(w->KKT->L->jc,w->KKT->PKPt->n,1, fn);
+
+
 		sprintf(fn, "%sdb/fpga/MatD_iter%02i.txt",DATA_PATH,(int)w->info->iter);
 		dumpDenseMatrix_UD(w->KKT->D,nK,1,fn);
 

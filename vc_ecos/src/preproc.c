@@ -1017,8 +1017,8 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 		dma_sign_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->PKPt->m));
 		kkt_sign_flag = 1;
 
-		sprintf(fn, "%sdb/fpga/Sign_initial.txt", DATA_PATH);
-		dumpVecSign_hw_imp(Vec_Sign, 1, mywork->KKT->PKPt->m,fn);
+		sprintf(fn, "%sdb/fpga/HW_SIGN_PS2PL.txt", DATA_PATH);
+		dumpVecSign_hw_imp(Vec_Sign, 4, mywork->KKT->PKPt->m,fn);
 	}
 
 #if PRINTLEVEL > 3
@@ -1101,14 +1101,16 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	//ps->pl  COL_CUMSUM info
 	Vec_Col_cumsum		= (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
 	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m));
-	sprintf(fn, "%sdb/fpga/MatL_initial.txt", DATA_PATH);
-	dumpSparseMatrix(mywork->KKT->L, fn);
+	sprintf(fn, "%sdb/fpga/MatL_COL_PS2PL.txt", DATA_PATH);
+	dumpVecSign_hw_imp(Vec_Col_cumsum, 4, mywork->KKT->PKPt->m,fn);
+	//dumpSparseMatrix(mywork->KKT->L, fn);
 
 	//ps->pl  ROW_CUMSUM info
 	Vec_Row_cumsum		= (idxint *) MALLOC(((Mat_Lt->m)+4)*sizeof(idxint));
-	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Col_cumsum,Mat_Lt->jc,(Mat_Lt->m));
-	sprintf(fn, "%sdb/fpga/MatLt_initial.txt", DATA_PATH);
-	dumpSparseMatrix(Mat_Lt, fn);
+	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Row_cumsum,Mat_Lt->jc,(Mat_Lt->m));
+	sprintf(fn, "%sdb/fpga/MatLt_ROW_PS2PL.txt", DATA_PATH);
+	dumpVecSign_hw_imp(Vec_Row_cumsum, 4, mywork->KKT->PKPt->m,fn);
+	//dumpSparseMatrix(Mat_Lt, fn);
 
 	kkt_factor_flag = 1;
 
