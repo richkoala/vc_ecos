@@ -142,6 +142,10 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 		Dma_LD_buffer = (demat_struct *) MALLOC((LD_nz+LD_sop_len)*sizeof(demat_struct));
 		memset(Dma_LD_buffer, 0, (KKT->PKPt->nnz+LD_sop_len)*sizeof(demat_struct));
 	}
+	else
+	{
+		Dma_LD_buffer = (demat_struct *) MALLOC(1*sizeof(demat_struct));
+	}
 
 	Vec_Sign = (idxint *) MALLOC(((KKT->L->m)+4)*sizeof(idxint));
 	
@@ -169,8 +173,19 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 		sprintf(fn_2, "%sdb/fpga/HW_SIGN_FRAME_ITER%02i.txt",DATA_PATH, iter_num);
 	}
 	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,fn_1);
-	dumpVecSign_hw_imp(Vec_Sign,4,KKT->PKPt->n,fn_2);
+	dumpVec_hw_imp(Vec_Sign,1,KKT->PKPt->n,fn_2);
 	#endif
+
+	#if DEBUG == 1
+	if (frame_id == CMDT_LDL_MatA_INIT || frame_id == CMDT_LDL_MatA_T_INIT || frame_id ==CMDTR_LDL_MatA_INIT || frame_id == CMDTR_LDL_MatA_T_INIT){
+		sprintf(fn_1, "%sdb/fpga/PS2PL_send%04d_MatA_FRAME_INIT%02i.txt",DATA_PATH, *PS2PL_trans_cnt,0);
+	}
+	else{
+		sprintf(fn_1, "%sdb/fpga/PS2PL_send%04d_MatA_FRAME_ITER%02i.txt",DATA_PATH, *PS2PL_trans_cnt,iter_num);
+	}
+	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,fn_1);
+	#endif
+
 
 	FREE(DeM_A);
 	FREE(Vec_Sign);
@@ -289,6 +304,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	#endif
 
 
+
 	LDL_dsolve(nK, Px, KKT->D,ldl_dsolve_cnt,ldl_dsolve_time);
 	#if DEBUG == 1
 	if (isinit==0){
@@ -362,13 +378,22 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 		sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,idx_b, 0);
 	else
 		sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_ITER%02i.txt",DATA_PATH,idx_b, iter_cnt);
-	dumpDevec_hw_imp(Vec_b,Vecb_sop_len*2, Vecb_dem, fn);
+	dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
+
+	
+	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
+		sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0);
+	else
+		sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_ITER%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt);
+	dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
+
+
 	/* 硬件输出时使用，后续调试
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_INIT%02i_cnt%02i.txt",DATA_PATH, 0,*ldl_ltsolve_cnt);
 	else
 		sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_ITER%02i_cnt%02i.txt", DATA_PATH,iter_cnt,*ldl_ltsolve_cnt);
-	dumpDevec_hw_imp(Vec_b,Vecx_sop_len, Vecx_dem, fn);
+	dumpDevec_hw_imp(Vec_b,1, Vecx_dem, fn);
 	*/
 	#endif
 	#endif
@@ -590,13 +615,20 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			sprintf(fn, "%sdb/fpga/HW_Vecb3_FRAME_INIT%02i_refine%02i.txt",DATA_PATH, 0,nitref);
 		else
 			sprintf(fn, "%sdb/fpga/HW_Vecb3_FRAME_ITER%02i_refine%02i.txt",DATA_PATH, iter_cnt,nitref);
-		dumpDevec_hw_imp(Pe,Vecb_sop_len*2, Vecb_dem, fn);
+		dumpDevec_hw_imp(Pe,1, Vecb_dem, fn);
+
+		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb3_FRAME_INIT%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt, 0,nitref);
+		else
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb3_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt, iter_cnt,nitref);
+		dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
+
 		/* 硬件输出时使用，后续调试
 		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 			sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_INIT%02i_cnt%02i.txt",DATA_PATH, 0,*ldl_ltsolve_cnt);
 		else
 			sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_ITER%02i_cnt%02i.txt",DATA_PATH, iter_cnt,*ldl_ltsolve_cnt);
-		dumpDevec_hw_imp(Vec_b,Vecx_sop_len, Vecx_dem, fn);
+		dumpDevec_hw_imp(Vec_b,1, Vecx_dem, fn);
 		*/
 #endif
 
@@ -835,13 +867,22 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 		sprintf(fn, "%sdb/fpga/HW_VecPb_FRAME_INIT%02i.txt",DATA_PATH, 0);
 	else
 		sprintf(fn, "%sdb/fpga/HW_VecPb_FRAME_ITER%02i.txt",DATA_PATH, iter_cnt);
-	dumpDevec_hw_imp(Vec_b,Vecb_sop_len*2, Vecb_dem*2, fn);
+	dumpDevec_hw_imp(Vec_b,1, Vecb_dem*2, fn);
+
+
+	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
+		sprintf(fn, "%sdb/fpga/PS2PL_send%04d_VecPb_FRAME_INIT%02i.txt",DATA_PATH,*PS2PL_trans_cnt, 0);
+	else
+		sprintf(fn, "%sdb/fpga/PS2PL_send%04d_VecPb_FRAME_ITER%02i.txt",DATA_PATH,*PS2PL_trans_cnt, iter_cnt);
+	dumpDevec_hw_imp(Vec_b,1, Vecb_dem*2, fn);
+
+
 	/* 硬件输出时使用，后续调试
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_INIT%02i_cnt%02i.txt",DATA_PATH, 0,*ldl_ltsolve_cnt);
 	else
 		sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_ITER%02i_cnt%02i.txt", DATA_PATH,iter_cnt,*ldl_ltsolve_cnt);
-	dumpDevec_hw_imp(Vec_b,Vecx_sop_len, Vecx_dem, fn);
+	dumpDevec_hw_imp(Vec_b,1, Vecx_dem, fn);
 	*/
 	#endif
 	#endif
@@ -1214,16 +1255,36 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			sprintf(fn, "%sdb/fpga/HW_Vecb2_FRAME_ITER%02i_refine%02i.txt",DATA_PATH, iter_cnt,kItRef);
 
 		if (flag_loop_quit == 0 && flag_loop_quit2== 0)
-			dumpDevec_hw_imp(Vec_b,Vecb_sop_len*2, Vecb_dem*2, fn);
+			dumpDevec_hw_imp(Vec_b,1, Vecb_dem*2, fn);
 		else if ((flag_loop_quit == 1 && flag_loop_quit2== 0) || (flag_loop_quit == 0 && flag_loop_quit2== 1))
-			dumpDevec_hw_imp(Vec_b,Vecb_sop_len*2, Vecb_dem, fn);
+			dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
+
+		if (flag_loop_quit == 0 && flag_loop_quit2== 0 && isinit == 1)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_VecPb_FRAME_INIT%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt, 0,kItRef);
+		else if (flag_loop_quit == 0 && flag_loop_quit2== 0 && isinit == 0)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_VecPb_FRAME_ITER%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt,iter_cnt,kItRef);
+		if (flag_loop_quit == 0 && flag_loop_quit2== 1 && isinit == 1)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb1_FRAME_INIT%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt,0,kItRef);
+		else if (flag_loop_quit == 0 && flag_loop_quit2== 1 && isinit == 0)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb1_FRAME_ITER%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt,iter_cnt,kItRef);
+		if (flag_loop_quit == 1 && flag_loop_quit2== 0 && isinit == 1)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb2_FRAME_INIT%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt,0,kItRef);
+		else if (flag_loop_quit == 1 && flag_loop_quit2== 0 && isinit == 0)
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb2_FRAME_ITER%02i_refine%02i.txt",DATA_PATH, *PS2PL_trans_cnt,iter_cnt,kItRef);
+
+		if (flag_loop_quit == 0 && flag_loop_quit2== 0)
+			dumpDevec_hw_imp(Vec_b,1, Vecb_dem*2, fn);
+		else if ((flag_loop_quit == 1 && flag_loop_quit2== 0) || (flag_loop_quit == 0 && flag_loop_quit2== 1))
+			dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
+
+
 			
 		/* 硬件输出时使用，后续调试
 		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 			sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_INIT%02i_cnt%02i.txt",DATA_PATH, 0,*ldl_ltsolve_cnt);
 		else
 			sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_ITER%02i_cnt%02i.txt",DATA_PATH, iter_cnt,*ldl_ltsolve_cnt);
-		dumpDevec_hw_imp(Vec_b,Vecx_sop_len, Vecx_dem, fn);
+		dumpDevec_hw_imp(Vec_b,1, Vecx_dem, fn);
 		*/
 #endif
 

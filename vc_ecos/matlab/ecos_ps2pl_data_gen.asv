@@ -1,0 +1,35 @@
+clc
+clear all
+close all
+
+path_data_db = '../data/db/fpga';
+file_start_idx = 1;
+files          = dir(path_data_db);
+
+file_config = '../data/db/fpga/config.dat';
+fid_config = fopen(file_config,'ab');
+len = [];
+for i = file_start_idx :length(files)
+    filename = files(i).name;
+    if (length(filename )>=9)
+        if (strcmp(filename(1:10),'PS2PL_send'))
+            filename_ps2pl_path = strcat(path_data_db,'/',file_name);
+            fid_ps2pl = fopen(filename_ps2pl_path);
+            
+            if (strfind(filename,'SIGN') || strfind(filename,'MatL_COL') || strfind(filename,'MatL_ROW') || || strfind(filename,'MatL_Vecb') || strfind(filename,'MatL_VecPb'))
+                func_decode_vector2file(fid_ps2pl,fid_config,'%f')
+            else if (strfind(filename,'MatA'))
+                func_decode_matrix2file(fid_ps2pl,fid_config)
+                else
+                    disp(sprintf('%f,error ps2pl'))
+                end
+            end
+                
+                
+%                 len_1 = func_decode_matrix2file(file_mat,fid_config)
+%                 len_2 = func_decode_vector2file(file_vec,fid_config,'%f')
+
+            disp(file_name)
+        end
+    end
+end

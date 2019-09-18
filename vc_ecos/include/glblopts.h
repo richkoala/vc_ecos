@@ -32,7 +32,7 @@
 #define PEOC_REORDER_PROTOCAL_SET		//硬件并行计算处理流程与对应数据产生，将可以并行处理的代码放在一起
 #define KKT_FACTOR_PL_PROCESS 0			//1 使能Pl完成fpga完成kkt_factor操作
 #define KKT_SOLVE_PL_PROCESS 0			//1 使能Pl完成fpga完成kkt_solve操作
-#define KKT_SOLVE_PARALLEL
+//#define KKT_SOLVE_PARALLEL
 
 //#define COMM_LOOP_TEST				//回环通讯测试
 

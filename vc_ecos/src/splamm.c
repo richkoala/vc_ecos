@@ -319,15 +319,10 @@ void dumpDevec_hw_imp(devec_struct* M, idxint cmd_len, idxint data_len,char* fn)
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
-		for (i=0; i<cmd_len; i++){
-			if (i==0)
-				fprintf(f,"%10d\t%10d\n", (int)M[i].frame_id_or_cnt,(int)M[i].frame_len_or_iter_num);
-			else{
-				//printf("%20.18lf\t20.18%lf\n", (double)M[i].double_data1,(double)M[i].double_data2);
-				fprintf(f,"%10d\t%10d\n", (int)M[i].frame_id_or_cnt,(int)M[i].frame_len_or_iter_num);
-			}
-		}
-		for(i=cmd_len; i<cmd_len+data_len; i++){               
+
+		fprintf(f,"%10d\t%10d%10d\t%10d\n", (int)M[0].frame_id_or_cnt,(int)M[0].frame_len_or_iter_num,(int)M[1].frame_id_or_cnt,(int)M[1].frame_len_or_iter_num);
+
+		for(i=cmd_len*2; i<cmd_len*2+data_len; i++){               
 			fprintf(f,"%20.18lf\n", (double)M[i].double_data1);
 		}
         fprintf(f,"%d\t%d\t%20.18e\n", cmd_len+data_len, cmd_len+data_len, 0.0);
@@ -340,20 +335,16 @@ void dumpDevec_hw_imp(devec_struct* M, idxint cmd_len, idxint data_len,char* fn)
 #endif
 }
 
-void dumpVecSign_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn)
+void dumpVec_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn)
 {
 #if DEBUG == 1
 	idxint i = 0;
 	FILE *f = fopen(fn,"w");
 	if( f != NULL ){
-		for (i=0; i<cmd_len; i++){
-			if (i==0)
-				fprintf(f,"%10d\t%10d\n", (int)M[i],  (int)M[i++]);
-			else{
-				fprintf(f,"%10d\t%10d\n", (int)M[i++],(int)M[i++]);
-			}
-		}
-		for(i=cmd_len; i<cmd_len+data_len; i++){               
+		if (i==0)
+			fprintf(f,"%10d\t%10d\%10d\t%10d\n", (int)M[i],  (int)M[i+1],(int)M[i+2],  (int)M[i+3]);
+
+		for(i=cmd_len*4; i<cmd_len*4+data_len; i++){               
 			fprintf(f,"%08d\n", M[i]);
 		}
         fprintf(f,"%d\t%d\t%20.18e\n", cmd_len+data_len, cmd_len+data_len, 0.0);

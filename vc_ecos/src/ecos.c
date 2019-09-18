@@ -357,7 +357,7 @@ idxint init(pwork* w)
 
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
-	frame_id = CMDTR_LDL_MatA_T_INIT;	//帧类型设置
+	frame_id = CMDT_LDL_MatA_T_INIT;	//帧类型设置
 #if PROFILING == 3
 	tic(&tfactor);
 	KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
@@ -1549,7 +1549,7 @@ idxint ECOS_solve(pwork* w)
 	/**/
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
-		frame_id = CMDTR_LDL_MatA_T_ITER;		//帧类型设置
+		frame_id = CMDT_LDL_MatA_T_ITER;		//帧类型设置
 
 #if PROFILING == 3
 		tic(&tfactor);

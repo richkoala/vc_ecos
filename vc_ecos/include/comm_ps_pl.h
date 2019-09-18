@@ -36,7 +36,7 @@ int kkt_sign_fpga(
 		int* Sign,
 		int  Sign_len,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 int kkt_col_cumsum_fpga(
@@ -44,7 +44,7 @@ int kkt_col_cumsum_fpga(
 		int* Col_cumsum,
 		int  Col_cumsum_len,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 int kkt_row_cumsum_fpga(
@@ -52,7 +52,7 @@ int kkt_row_cumsum_fpga(
 		int* Row_cumsum,
 		int  Row_cumsum_len,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 int kkt_factor_fpga(
@@ -66,7 +66,7 @@ int kkt_factor_fpga(
 		demat_struct* Dma_LD_buffer,
 		int LD_nz,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 int kkt_solve_fpga(
@@ -76,7 +76,7 @@ int kkt_solve_fpga(
 		ps2pl_sop Sop,
 		devec_struct* x,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 int kkt_solve_fpga_p(
@@ -87,7 +87,7 @@ int kkt_solve_fpga_p(
 		ps2pl_sop Sop,
 		devec_struct* Px,
 		int* PS2PL_trans_cnt,
-		int* PL2Ps_trans_cnt
+		int* PL2PS_trans_cnt
 		);
 
 //protocol
