@@ -34,19 +34,25 @@ int DMA_COMM_TEST();
 int kkt_sign_fpga(
 		int* Vec_Sign,
 		int* Sign,
-		int  Sign_len
+		int  Sign_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		);
 
 int kkt_col_cumsum_fpga(
 		int* Vec_Col_cumsum,
 		int* Col_cumsum,
-		int  Col_cumsum_len
+		int  Col_cumsum_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		);
 
 int kkt_row_cumsum_fpga(
 		int* Vec_Row_cumsum,
 		int* Row_cumsum,
-		int  Row_cumsum_len
+		int  Row_cumsum_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		);
 
 int kkt_factor_fpga(
@@ -58,7 +64,9 @@ int kkt_factor_fpga(
 		int* Sign,
 		int  Sign_len,
 		demat_struct* Dma_LD_buffer,
-		int LD_nz
+		int LD_nz,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		);
 
 int kkt_solve_fpga(
@@ -66,7 +74,10 @@ int kkt_solve_fpga(
 		devec_struct* b,
 		int b_len,
 		ps2pl_sop Sop,
-		devec_struct* x);
+		devec_struct* x,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
+		);
 
 int kkt_solve_fpga_p(
 		double* Pb1,
@@ -74,7 +85,10 @@ int kkt_solve_fpga_p(
 		devec_struct* Pb,		//÷°∏Ò Ωsop1+b1/b2
 		int b_len,
 		ps2pl_sop Sop,
-		devec_struct* Px);
+		devec_struct* Px,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
+		);
 
 //protocol
 

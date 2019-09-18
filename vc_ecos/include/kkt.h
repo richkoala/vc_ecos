@@ -91,12 +91,12 @@ typedef struct kkt{
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
 #if PROFILING == 3
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2, idxint* kkt_factor_cnt, idxint frame_id, idxint iter_num);
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2, idxint* kkt_factor_cnt, idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 #else
 #if PROFILING > 1
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2,idxint frame_id, idxint iter_num);
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2,idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 #else
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta,idxint frame_id, idxint iter_num);
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta,idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 #endif
 #endif
 
@@ -132,9 +132,9 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta);
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
 #if PROFILING == 3
-idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt);
+idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 #else
-idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt);
+idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt,idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #endif
 
 #else
@@ -149,9 +149,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 
 #ifdef PEOC_REORDER_PROTOCAL_SET
 	#if PROFILING == 3
-	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt);
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 	#else
-	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt);
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt);
 	#endif
 
 #else

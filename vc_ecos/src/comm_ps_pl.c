@@ -79,7 +79,9 @@ int DMA_COMM_TEST()
 int kkt_sign_fpga(
 		int* Vec_Sign,
 		int* Sign,
-		int  Sign_len
+		int  Sign_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		)
 {
 
@@ -89,6 +91,7 @@ int kkt_sign_fpga(
 	Vec_Sign[2] = 0;
 	Vec_Sign[3]	= 0;
 	memcpy(&Vec_Sign[4],Sign,sizeof(int)*Sign_len);
+	*PS2PL_trans_cnt++;
 
 #ifndef ZCU102_HW_IMP 
 	return 2;
@@ -122,7 +125,9 @@ int kkt_sign_fpga(
 int kkt_col_cumsum_fpga(
 		int* Vec_Col_cumsum,
 		int* Col_cumsum,
-		int  Col_cumsum_len
+		int  Col_cumsum_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		)
 {
 
@@ -132,6 +137,7 @@ int kkt_col_cumsum_fpga(
 	Vec_Col_cumsum[2] = 0;
 	Vec_Col_cumsum[3] = 0;
 	memcpy(&Vec_Col_cumsum[4],Col_cumsum,sizeof(int)*Col_cumsum_len);
+	*PS2PL_trans_cnt++;
 
 #ifndef ZCU102_HW_IMP 
 	return 2;
@@ -165,7 +171,9 @@ int kkt_col_cumsum_fpga(
 int kkt_row_cumsum_fpga(
 		int* Vec_Row_cumsum,
 		int* Row_cumsum,
-		int  Row_cumsum_len
+		int  Row_cumsum_len,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		)
 {
 
@@ -175,6 +183,7 @@ int kkt_row_cumsum_fpga(
 	Vec_Row_cumsum[2] = 0;
 	Vec_Row_cumsum[3] = 0;
 	memcpy(&Vec_Row_cumsum[4],Row_cumsum,sizeof(int)*Row_cumsum_len);
+	*PS2PL_trans_cnt++;
 
 #ifndef ZCU102_HW_IMP 
 	return 2;
@@ -216,7 +225,9 @@ int kkt_factor_fpga(
 		int* Sign,
 		int  Sign_len,
 		demat_struct* Dma_LD_buffer,
-		int LD_nz
+		int LD_nz,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
 		)
 {
 
@@ -230,14 +241,14 @@ int kkt_factor_fpga(
 	//LDL分解所需参数
 	DeM_A[1].double_data1 = dat_eps;
 	DeM_A[1].double_data2 = dat_delta;
-
+	*PS2PL_trans_cnt++;
 	//Sign帧头参数
-	Vec_Sign[0] = CMDT_LDL_SIGN;
+	/*Vec_Sign[0] = CMDT_LDL_SIGN;
 	Vec_Sign[1] = (Sign_len+4)*4;
 	Vec_Sign[2] = Sop.cnt;
 	Vec_Sign[3]	= Sop.iter_num;
 	memcpy(&Vec_Sign[4],Sign,sizeof(int)*Sign_len);
-
+	*/
 #ifndef ZCU102_HW_IMP 
 	return 2;
 #elif KKT_FACTOR_PL_PROCESS == 0
@@ -254,6 +265,7 @@ int kkt_factor_fpga(
 		Sop.frame_id == CMDTR_LDL_MatA_ITER   ||
 		Sop.frame_id == CMDTR_LDL_MatA_T_ITER 
 		) {
+		*PL2Ps_trans_cnt++;
 		Dma_rx_len = (LD_nz*16 + 16);			//调试回读LD矩阵信息
 		Xil_DCacheInvalidateRange((u32)Dma_LD_buffer, (Dma_rx_len/64+1)*64);
 		Dma_rx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32) Dma_LD_buffer	,	Dma_rx_len	, XAXIDMA_DEVICE_TO_DMA);
@@ -264,7 +276,7 @@ int kkt_factor_fpga(
 	//==========================================//
 	//==========KKT send KKT_sign info==========//
 	//==========================================//
-
+	/*
 	Dma_tx_len = Vec_Sign[1];	//int32 4B
 	Xil_DCacheFlushRange((u32)Vec_Sign, Dma_tx_len);
 	Dma_tx_status = XAxiDma_SimpleTransfer(&AxiDma, (u32)Vec_Sign, Dma_tx_len , XAXIDMA_DMA_TO_DEVICE);
@@ -276,7 +288,7 @@ int kkt_factor_fpga(
 	{
 	}
 	Dma_tx_done = 0;
-
+	*/
 	//==========================================//
 	//==========KKT send KKT_sign info==========//
 	//==========================================//
@@ -322,7 +334,10 @@ int kkt_solve_fpga(
 		devec_struct* b,
 		int b_len,
 		ps2pl_sop Sop,
-		devec_struct* x)
+		devec_struct* x,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
+		)
 
 {
 	//帧头参数
@@ -331,6 +346,8 @@ int kkt_solve_fpga(
 	b[1].frame_id_or_cnt 		= Sop.cnt;
 	b[1].frame_len_or_iter_num  = Sop.iter_num;
 	memcpy(&b[2],Pb,sizeof(devec_struct)*b_len);
+	*PS2PL_trans_cnt++;
+	*PL2Ps_trans_cnt++;
 
 #ifndef ZCU102_HW_IMP
 	return 2;		
@@ -392,7 +409,10 @@ int kkt_solve_fpga_p(
 		devec_struct* Pb,
 		int b_len,
 		ps2pl_sop Sop,
-		devec_struct* Px)
+		devec_struct* Px,
+		int* PS2PL_trans_cnt,
+		int* PL2Ps_trans_cnt
+		)
 
 {
 	//帧头参数
@@ -401,6 +421,9 @@ int kkt_solve_fpga_p(
 	Pb[0].frame_len_or_iter_num = Sop.frame_len;
 	Pb[1].frame_id_or_cnt 		= Sop.cnt;
 	Pb[1].frame_len_or_iter_num = Sop.iter_num;
+	*PS2PL_trans_cnt++;
+	*PL2Ps_trans_cnt++;
+
 	for (i=0;i<(b_len/2);i++){
 		Pb[2*i+2].double_data1 = Pb2[i];		//高位地址为Pb2
 		Pb[2*i+3].double_data1 = Pb1[i];		//高位地址为Pb1

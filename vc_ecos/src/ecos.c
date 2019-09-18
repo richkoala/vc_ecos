@@ -360,15 +360,15 @@ idxint init(pwork* w)
 	frame_id = CMDTR_LDL_MatA_T_INIT;	//帧类型设置
 #if PROFILING == 3
 	tic(&tfactor);
-	KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,w->info->iter);
+	KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	w->info->tfactor += toc(&tfactor);
 #else
 #if PROFILING > 1
 	tic(&tfactor);
-    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,,frame_id,w->info->iter);
+    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,,frame_id,w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	w->info->tfactor += toc(&tfactor);
 #else
-    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta,frame_id,w->info->iter);
+    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta,frame_id,w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 #endif
 
@@ -376,7 +376,7 @@ idxint init(pwork* w)
 
 #if PROFILING == 3
 	tic(&tfactor);
-    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt);
+    KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2);
 	w->info->tfactor += toc(&tfactor);
 #else
 #if PROFILING > 1
@@ -432,9 +432,9 @@ idxint init(pwork* w)
 	frame_id = CMDT_CAL_Vecb_INIT1;	//帧类型设置
 
 #if PROFILING == 3
-	w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+	w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #else
-	w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,frame_id,(int)w->info->iter);
+	w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 
 
@@ -464,9 +464,9 @@ idxint init(pwork* w)
 	frame_id = CMDT_CAL_Vecb_INIT2;	//帧类型设置
 
 #if PROFILING == 3
-	w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+	w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #else
-	w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref, frame_id,(int)w->info->iter);
+	w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref, frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 	
 #if PROFILING > 1
@@ -481,7 +481,7 @@ idxint init(pwork* w)
 	#endif
 
 	frame_id = CMDT_CAL_Vecb_INIT12;
-	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	w->info->nitref1 = (nitref & 0xFFFF0000)>>16;
 	w->info->nitref2 = nitref & 0xFFFF; 
 
@@ -1553,15 +1553,15 @@ idxint ECOS_solve(pwork* w)
 
 #if PROFILING == 3
 		tic(&tfactor);
-		KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,(int)w->info->iter);
+		KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,&w->info->kkt_factor_cnt,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 		w->info->tfactor += toc(&tfactor);
 #else
 #if PROFILING > 1
 		tic(&tfactor);
-        KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,frame_id,(int)w->info->iter);
+        KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta, &w->info->tfactor_t1, &w->info->tfactor_t2,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
         w->info->tfactor += toc(&tfactor);
 #else
-        KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta,frame_id,(int)w->info->iter);
+        KKT_FACTOR_RETURN_CODE = kkt_factor(w->KKT, w->stgs->eps, w->stgs->delta,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 #endif
 
@@ -1634,9 +1634,9 @@ idxint ECOS_solve(pwork* w)
 		frame_id = CMDT_CAL_Vecb_ITER1;	//帧类型设置
 
 #if PROFILING == 3
-		w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+		w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #else
-		w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter);
+		w->info->nitref1 = kkt_solve(1,w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 
 #if PROFILING > 1
@@ -1651,9 +1651,9 @@ idxint ECOS_solve(pwork* w)
 		frame_id = CMDT_CAL_Vecb_ITER2;	//帧类型设置
 		//x2 slove   ' Ax1=b1 Linear equation solving'
 #if PROFILING == 3
-		w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+		w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #else
-		w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter);
+		w->info->nitref2 = kkt_solve(2,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 #endif
 
 #if PROFILING > 1
@@ -1667,7 +1667,7 @@ idxint ECOS_solve(pwork* w)
 		tic(&tkktsolve);
 	#endif
 	frame_id = CMDT_CAL_Vecb_ITER12;
-	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+	nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	//nitref =  kkt_solve_p2(w->KKT, w->A, w->G, w->KKT->RHS1, w->KKT->dx1, w->KKT->dy1, w->KKT->dz1, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 1, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,0,(int)w->info->iter);
 	w->info->nitref1 = (nitref & 0xFFFF0000)>>16;
 	w->info->nitref2 = nitref & 0xFFFF;
@@ -1858,9 +1858,9 @@ idxint ECOS_solve(pwork* w)
 		frame_id = CMDT_CAL_Vecb_ITER3;	//帧类型设置
 
 	#if PROFILING > 1
-		w->info->nitref3 = kkt_solve(3,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter);
+		w->info->nitref3 = kkt_solve(3,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,&w->info->ldl_lsolve2_cnt,&w->info->ldl_lsolve2_time,&w->info->ldl_dsolve_cnt,&w->info->ldl_dsolve_time,&w->info->ldl_ltsolve_cnt,&w->info->ldl_ltsolve_time,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	#else
-		w->info->nitref3 = kkt_solve(3,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter);
+		w->info->nitref3 = kkt_solve(3,w->KKT, w->A, w->G, w->KKT->RHS2, w->KKT->dx2, w->KKT->dy2, w->KKT->dz2, w->n, w->p, w->m, w->C, 0, w->stgs->nitref,frame_id,(int)w->info->iter,&w->info->PS2PL_trans_cnt,&w->info->PL2PS_trans_cnt);
 	#endif
 
 #else		

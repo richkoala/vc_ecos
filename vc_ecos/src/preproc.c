@@ -782,6 +782,12 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
     PRINTTEXT("Memory allocated for info struct\n");
 #endif
 
+#ifdef PEOC_REORDER_PROTOCAL_SET
+	mywork->info->PS2PL_trans_cnt = 0;
+    mywork->info->PL2PS_trans_cnt = 0;
+#endif
+
+
 #if defined EQUILIBRATE && EQUILIBRATE > 0
     /* equilibration vector */
     mywork->xequil = (pfloat *)MALLOC(n*sizeof(pfloat));
@@ -1014,7 +1020,7 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	//
 	if (kkt_sign_flag == 0){
 		Vec_Sign = (idxint *)MALLOC(((mywork->KKT->PKPt->m)+4)*sizeof(idxint));
-		dma_sign_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->PKPt->m));
+		dma_sign_flag = kkt_sign_fpga(Vec_Sign,mywork->KKT->Sign,(mywork->KKT->PKPt->m),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
 		kkt_sign_flag = 1;
 
 		sprintf(fn, "%sdb/fpga/HW_SIGN_PS2PL.txt", DATA_PATH);
@@ -1100,14 +1106,14 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 
 	//ps->pl  COL_CUMSUM info
 	Vec_Col_cumsum		= (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
-	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m));
+	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
 	sprintf(fn, "%sdb/fpga/MatL_COL_PS2PL.txt", DATA_PATH);
 	dumpVecSign_hw_imp(Vec_Col_cumsum, 4, mywork->KKT->PKPt->m,fn);
 	//dumpSparseMatrix(mywork->KKT->L, fn);
 
 	//ps->pl  ROW_CUMSUM info
 	Vec_Row_cumsum		= (idxint *) MALLOC(((Mat_Lt->m)+4)*sizeof(idxint));
-	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Row_cumsum,Mat_Lt->jc,(Mat_Lt->m));
+	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Row_cumsum,Mat_Lt->jc,(Mat_Lt->m),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
 	sprintf(fn, "%sdb/fpga/MatLt_ROW_PS2PL.txt", DATA_PATH);
 	dumpVecSign_hw_imp(Vec_Row_cumsum, 4, mywork->KKT->PKPt->m,fn);
 	//dumpSparseMatrix(Mat_Lt, fn);

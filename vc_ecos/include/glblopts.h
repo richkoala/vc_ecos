@@ -55,7 +55,7 @@
 						   /* 3: HW design reference                     */
 
 /* SET DEBUG LEVEL ----------------------------------------------------- */
-#define DEBUG (0)          /* 0: no debugging information                */
+#define DEBUG (1)          /* 0: no debugging information                */
                            /* 1: debug info & dump intermediate results  */
                            /* (flag used only for development)           */
 

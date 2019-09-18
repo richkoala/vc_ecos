@@ -44,12 +44,12 @@
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
 #if PROFILING == 3
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2, idxint* kkt_factor_cnt, idxint frame_id, idxint iter_num)
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2, idxint* kkt_factor_cnt, idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #else
 #if PROFILING > 1
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2,idxint frame_id, idxint iter_num)
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta, pfloat *t1, pfloat* t2,idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #else
-idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta,idxint frame_id, idxint iter_num)
+idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta,idxint frame_id, idxint iter_num, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #endif
 #endif
 
@@ -154,7 +154,9 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 							KKT->Sign,
 							KKT->PKPt->n,
 							Dma_LD_buffer,
-							LD_nz
+							LD_nz,
+							PS2PL_trans_cnt,
+							PL2PS_trans_cnt
 							);
 		//Mat_A
 	#if DEBUG == 1
@@ -204,9 +206,9 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 #ifdef PEOC_REORDER_PROTOCAL_SET
 
 #if PROFILING == 3
-idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt)
+idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #else
-idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt)
+idxint kkt_solve(idxint idx_b, kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt,idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 #endif
 
 #else
@@ -350,7 +352,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			Vec_b,
 			Vecb_dem,
 			Vecb_Sop,
-			Vec_x);
+			Vec_x,
+			PS2PL_trans_cnt,
+			PL2PS_trans_cnt);
 
 	#if PROFILING == 3
 	#if DEBUG == 1
@@ -577,7 +581,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 				Vec_b,
 				Vecb_dem,
 				Vecb_Sop,
-				Vec_x);
+				Vec_x,
+				PS2PL_trans_cnt,
+				PL2PS_trans_cnt);
 
 #if PROFILING == 3
 		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
@@ -612,9 +618,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 
 #ifdef PEOC_REORDER_PROTOCAL_SET
 	#if PROFILING == 3
-	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt)
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref,idxint* ldl_lsolve2_cnt,pfloat* ldl_lsolve2_time,idxint* ldl_dsolve_cnt,pfloat* ldl_dsolve_time,idxint* ldl_ltsolve_cnt,pfloat* ldl_ltsolve_time, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 	#else
-	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt)
+	idxint kkt_solve_p2(kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* dx, pfloat* dy, pfloat* dz, pfloat* Pb_2, pfloat* dx_2, pfloat* dy_2, pfloat* dz_2, idxint n, idxint p, idxint m, cone* C, idxint isinit, idxint nitref, idxint frame_id ,idxint iter_cnt, idxint* PS2PL_trans_cnt,idxint* PL2PS_trans_cnt)
 	#endif
 
 #else
@@ -819,7 +825,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			Vec_b,
 			Vecb_dem*2,
 			Vecb_Sop,
-			Vec_x);
+			Vec_x,
+			PS2PL_trans_cnt,
+			PL2PS_trans_cnt);
 
 	#if PROFILING == 3
 	#if DEBUG == 1
@@ -1176,14 +1184,20 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 				Vec_b,
 				Vecb_dem,
 				Vecb_Sop,
-				Vec_x);
+				Vec_x,
+				PS2PL_trans_cnt,
+				PL2PS_trans_cnt
+				);
 	else if  ((flag_loop_quit == 0 && flag_loop_quit2 == 1) ||  (flag_loop_quit == 1 && flag_loop_quit2 == 0))
 		kkt_solve_fpga(
 				Pe,
 				Vec_b,
 				Vecb_dem,
 				Vecb_Sop,
-				Vec_x);
+				Vec_x,
+				PS2PL_trans_cnt,
+				PL2PS_trans_cnt
+				);
 
 #if PROFILING == 3
 		if (flag_loop_quit == 0 && flag_loop_quit2== 0 && isinit == 1)

@@ -181,7 +181,10 @@ typedef struct stats{
 
     pfloat centrality; /*Centrality at the end of the backtracking*/
 #endif
-
+#ifdef PEOC_REORDER_PROTOCAL_SET
+	idxint PS2PL_trans_cnt;
+	idxint PL2PS_trans_cnt;
+#endif
 } stats;
 
 
