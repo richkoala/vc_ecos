@@ -1101,29 +1101,38 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 
 	LtoLt	= MALLOC(mywork->KKT->L->nnz*sizeof(idxint));
 	Mat_Lt	= transposeSparseMatrix(mywork->KKT->L, LtoLt);
-	
+
+	sprintf(fn, "%sdb/fpga/MatL_PS2PL.txt", DATA_PATH);
+	dumpSparseMatrix(mywork->KKT->L,fn);
+	sprintf(fn, "%sdb/fpga/MatL_T_PS2PL.txt", DATA_PATH);
+	dumpSparseMatrix(Mat_Lt,fn);
+
+
+
 	//-MatPKPt_initial-
 	sprintf(fn, "%sdb/fpga/MatPKPt_initial.txt", DATA_PATH);
 	dumpSparseMatrix(mywork->KKT->PKPt, fn);
 
 	//ps->pl  COL_CUMSUM info
-	Vec_Col_cumsum		= (idxint *) MALLOC(((mywork->KKT->L->m)+4)*sizeof(idxint));
-	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
+	Vec_Col_cumsum		= (idxint *) MALLOC(((mywork->KKT->L->m+1)+4)*sizeof(idxint));
+	dma_col_cumsum_flag = kkt_col_cumsum_fpga(Vec_Col_cumsum,mywork->KKT->L->jc,(mywork->KKT->L->m+1),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
 	sprintf(fn, "%sdb/fpga/MatL_COL_PS2PL.txt", DATA_PATH);
-	dumpVec_hw_imp(Vec_Col_cumsum, 1, mywork->KKT->PKPt->m,fn);
+	dumpVec_hw_imp(Vec_Col_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
 	sprintf(fn, "%sdb/fpga/PS2PL_send%04d_MatL_COL_INFO.txt",DATA_PATH,mywork->info->PS2PL_trans_cnt);
-	dumpVec_hw_imp(Vec_Col_cumsum, 1, mywork->KKT->PKPt->m,fn);
+	dumpVec_hw_imp(Vec_Col_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
+
+
 
 
 	//dumpSparseMatrix(mywork->KKT->L, fn);
 
 	//ps->pl  ROW_CUMSUM info
-	Vec_Row_cumsum		= (idxint *) MALLOC(((Mat_Lt->m)+4)*sizeof(idxint));
-	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Row_cumsum,Mat_Lt->jc,(Mat_Lt->m),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
+	Vec_Row_cumsum		= (idxint *) MALLOC(((Mat_Lt->m+1)+4)*sizeof(idxint));
+	dma_row_cumsum_flag = kkt_row_cumsum_fpga(Vec_Row_cumsum,Mat_Lt->jc,(Mat_Lt->m+1),&mywork->info->PS2PL_trans_cnt,&mywork->info->PL2PS_trans_cnt);
 	sprintf(fn, "%sdb/fpga/MatLt_ROW_PS2PL.txt", DATA_PATH);
-	dumpVec_hw_imp(Vec_Row_cumsum, 1, mywork->KKT->PKPt->m,fn);
+	dumpVec_hw_imp(Vec_Row_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
 	sprintf(fn, "%sdb/fpga/PS2PL_send%04d_MatL_ROW_INFO.txt",DATA_PATH,mywork->info->PS2PL_trans_cnt);
-	dumpVec_hw_imp(Vec_Row_cumsum, 1, mywork->KKT->PKPt->m,fn);
+	dumpVec_hw_imp(Vec_Row_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
 	//dumpSparseMatrix(Mat_Lt, fn);
 	kkt_factor_flag = 1;
 

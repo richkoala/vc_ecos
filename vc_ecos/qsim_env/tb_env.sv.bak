@@ -16,6 +16,7 @@ module tb_env();
 	wire 			m_axis_mm2s_tready;
 	reg 			m_axis_mm2s_tvalid;
 
+	//parameter	kf_num = 1;
 	parameter PERIOD					= 10;
 	parameter PS2PL_SEND_NUM			= 82;
 	//protocol
