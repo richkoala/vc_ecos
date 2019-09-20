@@ -1101,12 +1101,12 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 
 	LtoLt	= MALLOC(mywork->KKT->L->nnz*sizeof(idxint));
 	Mat_Lt	= transposeSparseMatrix(mywork->KKT->L, LtoLt);
-
+/*
 	sprintf(fn, "%sdb/fpga/MatL_PS2PL.txt", DATA_PATH);
 	dumpSparseMatrix(mywork->KKT->L,fn);
 	sprintf(fn, "%sdb/fpga/MatL_T_PS2PL.txt", DATA_PATH);
 	dumpSparseMatrix(Mat_Lt,fn);
-
+*/
 
 
 	//-MatPKPt_initial-
@@ -1120,8 +1120,6 @@ pwork* ECOS_setup(idxint n, idxint m, idxint p, idxint l, idxint ncones, idxint*
 	dumpVec_hw_imp(Vec_Col_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
 	sprintf(fn, "%sdb/fpga/PS2PL_send%04d_MatL_COL_INFO.txt",DATA_PATH,mywork->info->PS2PL_trans_cnt);
 	dumpVec_hw_imp(Vec_Col_cumsum, 1, (mywork->KKT->PKPt->m+1),fn);
-
-
 
 
 	//dumpSparseMatrix(mywork->KKT->L, fn);

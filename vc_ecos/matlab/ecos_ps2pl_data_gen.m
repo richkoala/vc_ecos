@@ -9,9 +9,9 @@ path_data_db = '../data/db/fpga';
 file_start_idx = 1;
 files          = dir(path_data_db);
 
-file_config = '../data/db/fpga/config.dat';
+file_config = '../data/db/fpga/config_p727.dat';
 if (exist(file_config,'file'))
-    system('del ..\data\db\fpga\config.dat');
+    system('del ..\data\db\fpga\config_p727.dat');
 end
 
 fid_config = fopen(file_config,'ab');
@@ -62,5 +62,5 @@ for i = file_start_idx :length(files)
         end
     end
 end
-
+ fclose all
 dec2hex(sum(len_all))

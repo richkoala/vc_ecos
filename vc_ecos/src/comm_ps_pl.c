@@ -424,9 +424,9 @@ int kkt_solve_fpga_p(
 	(*PS2PL_trans_cnt)++;
 	(*PL2PS_trans_cnt)++;
 
-	for (i=0;i<(b_len/2);i++){
-		Pb[2*i+2].double_data1 = Pb2[i];		//高位地址为Pb2
-		Pb[2*i+3].double_data1 = Pb1[i];		//高位地址为Pb1
+	for (i=0;i<(b_len);i++){
+		Pb[2*i+2].double_data1 = Pb1[i];		//low 位地址为Pb1
+		Pb[2*i+3].double_data1 = Pb2[i];		//high位地址为Pb2
 	}
 	
 #ifndef ZCU102_HW_IMP

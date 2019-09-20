@@ -855,7 +855,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			Pb,
 			Pb_2,
 			Vec_b,
-			Vecb_dem*2,
+			Vecb_dem,
 			Vecb_Sop,
 			Vec_x,
 			PS2PL_trans_cnt,

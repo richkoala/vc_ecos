@@ -16,8 +16,14 @@ module tb_env();
 	wire 			m_axis_mm2s_tready;
 	reg 			m_axis_mm2s_tvalid;
 
+	//parameter	kf_num = 1;
 	parameter PERIOD					= 10;
-	parameter PS2PL_SEND_NUM			= 82;
+	parameter Dem = 727;
+	//parameter PS2PL_SEND_NUM			= 82;
+	//localparam file_name 				= {"../data/db/fpga/config_s727.dat"};
+
+	parameter PS2PL_SEND_NUM			= 61;
+	localparam file_name 				= {"../data/db/fpga/config_p727.dat"};	
 	//protocol
 	parameter CMDT_LDL_MatA_INIT    	= 16'h00A0;
 	parameter CMDT_LDL_MatA_T_INIT  	= 16'h00A1;
@@ -56,7 +62,6 @@ module tb_env();
 	parameter CMDR_DOUTX_ITER12	  		= 16'h00FA;
 	parameter CMDR_DOUTX_ITER3	  		= 16'h00FB;
                    
-	parameter Dem = 727;
 	parameter Sign_Col_Row_Len 			= Dem*4; 
 	parameter Vecbx_len	  	   			= Dem*8; 
 	parameter VecPb_len	  	   			= Dem*8*2; 
@@ -65,7 +70,7 @@ module tb_env();
  	parameter num						= 16;
  	parameter DW						= 8;
  	parameter Tco						= 0.5;
-	localparam file_name = {"./config.dat"};
+	
    
 	integer	  ps2pl_cnt;
 	integer	  fid_load;
@@ -88,7 +93,12 @@ module tb_env();
   	  	
   	reg 					trans_dat32_flag ;
   	reg 					trans_dat64_flag ;
+  	reg						trans_datP64_flag;
   	reg 					trans_dat128_flag;
+  	
+  	reg 	  [DW*4-1 :0] 	last_dat_w32;
+  	reg 	  [DW*8-1 :0] 	last_dat_w64;
+  	reg 	  [DW*16-1 :0] 	last_dat_w128;
   	
   	wire	[31:0]			sign_0;
   	wire	[31:0]			sign_1;
@@ -158,6 +168,7 @@ module tb_env();
 		ps2pl_send_cnt	  = 0;
 		trans_dat32_flag  = 1'b0;                                                 
 		trans_dat64_flag  = 1'b0;                                                 
+		trans_datP64_flag = 1'b0;
 		trans_dat128_flag = 1'b0; 	
     end 
      
@@ -193,16 +204,17 @@ module tb_env();
   	assign 			row_1	= (trans_dat32_flag & frame_id[15:0] ==  CMDT_INFO_MatL_T_COLNUM )	 ? m_axis_mm2s_tdata[32*2-1:32*1]:32'h0;
   	assign 			row_2	= (trans_dat32_flag & frame_id[15:0] ==  CMDT_INFO_MatL_T_COLNUM )	 ? m_axis_mm2s_tdata[32*3-1:32*2]:32'h0;
   	assign 			row_3	= (trans_dat32_flag & frame_id[15:0] ==  CMDT_INFO_MatL_T_COLNUM )	 ? m_axis_mm2s_tdata[32*4-1:32*3]:32'h0;
-  	assign 			row_idx	= (trans_dat128_flag )? m_axis_mm2s_tdata[32*1-1:32*0]:32'h0;
-  	assign 			col_idx	= (trans_dat128_flag )? m_axis_mm2s_tdata[32*2-1:32*1]:32'h0;
-  	assign 			dat_val	= (trans_dat128_flag )? m_axis_mm2s_tdata[32*4-1:32*2]:32'h0;
-  	assign 			b_val0	= (trans_dat64_flag ) ? m_axis_mm2s_tdata[32*2-1:32*0]:32'h0;   
-   	assign 			b_val1	= (trans_dat64_flag ) ? m_axis_mm2s_tdata[32*4-1:32*2]:32'h0;
+  	assign 			row_idx	= (trans_dat128_flag ) ? m_axis_mm2s_tdata[32*1-1:32*0]:32'h0;
+  	assign 			col_idx	= (trans_dat128_flag ) ? m_axis_mm2s_tdata[32*2-1:32*1]:32'h0;
+  	assign 			dat_val	= (trans_dat128_flag ) ? m_axis_mm2s_tdata[32*4-1:32*2]:32'h0;
+  	assign 			b_val0	= (trans_datP64_flag ) ? m_axis_mm2s_tdata[32*2-1:32*0]:32'h0;   
+   	assign 			b_val1	= (trans_datP64_flag ) ? m_axis_mm2s_tdata[32*4-1:32*2]:32'h0;
 	                                                                              
 	task protocol_decode;                                                         
 	                                                                              
 		trans_dat32_flag  = 1'b0;                                                 
-		trans_dat64_flag  = 1'b0;                                                 
+		trans_dat64_flag  = 1'b0;
+		trans_datP64_flag = 1'b0;                                                
 		trans_dat128_flag = 1'b0;                                                 
 	                                                                              
 	
@@ -227,19 +239,24 @@ module tb_env();
 		else if( 
 			frame_id[15:0] ==CMDT_CAL_Vecb_INIT1   	     ||
 			frame_id[15:0] ==CMDT_CAL_Vecb_INIT2   	     ||
-			frame_id[15:0] ==CMDT_CAL_Vecb_INIT12   	 ||
 			frame_id[15:0] ==CMDTR_CAL_Vecb_INIT1   	 ||
 			frame_id[15:0] ==CMDTR_CAL_Vecb_INIT2   	 ||
 			frame_id[15:0] ==CMDT_CAL_Vecb_ITER1   	     ||
 			frame_id[15:0] ==CMDT_CAL_Vecb_ITER2   	     ||
 			frame_id[15:0] ==CMDTR_CAL_Vecb_ITER1   	 ||
 			frame_id[15:0] ==CMDTR_CAL_Vecb_ITER2   	 ||
-			frame_id[15:0] ==CMDT_CAL_Vecb_ITER12  	     ||
 			frame_id[15:0] ==CMDT_CAL_Vecb_ITER3   	     ||
 			frame_id[15:0] ==CMDTR_CAL_Vecb_ITER3 ) begin
 			trans_dat64_flag = 1'b1;
 			fid_r = $fread(buf_w64,fid_load, ,(frame_len-16)/8);
 			//$display(" 64bit B    data transfer");
+		end
+		else if( 
+			frame_id[15:0] ==CMDT_CAL_Vecb_INIT12   	 ||
+			frame_id[15:0] ==CMDT_CAL_Vecb_ITER12) begin
+			trans_datP64_flag = 1'b1;
+			fid_r = $fread(buf_w128,fid_load, ,(frame_len-16)/16);
+			//$display(" 128bit PB    data transfer");
 		end
 		else if(
 			frame_id[15:0] ==  CMDT_LDL_MatA_INIT    	||
@@ -260,41 +277,48 @@ module tb_env();
 		end
 		else begin
 			$display("protocol frame id decode error");
+			$display("protocol frame id is %04h",frame_id[15:0]);
+			#100;
 			$stop();
 		end
    	endtask
-   	
+  	
    	task trans_info_disp;                                                         
         //input disp_en;
+        data_w32_reverse( buf_w32[(frame_len-16)/4-1]  ,last_dat_w32);   
+        data_w64_reverse( buf_w64[(frame_len-16)/8-1]  ,last_dat_w64);   
+        data_w128_reverse(buf_w128[(frame_len-16)/16-1],last_dat_w128);
+        
         //if (disp_en == 1'b1)begin                                       
-		if (frame_id[15:0] ==  CMDT_LDL_SIGN)					$display(" 32bit 		sign 	    data transfer %04d",ps2pl_send_cnt);
-		else if	(frame_id[15:0] ==  CMDT_INFO_MatL_COLNUM )		$display(" 32bit 		col 	    data transfer %04d",ps2pl_send_cnt);
-		else if	(frame_id[15:0] == CMDT_INFO_MatL_T_COLNUM	)	$display(" 32bit 		row 	    data transfer %04d",ps2pl_send_cnt);                                                                                    
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT1  	)	$display(" 64bit 		Init B1     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT2  	)   $display(" 64bit 		Init B2     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT12 	)	$display(" 64bit 		Init PB     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_INIT1 	)	$display(" 64bit Debug 	Init B1     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_INIT2 	)	$display(" 64bit Debug 	Init B2     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER1  	)  	$display(" 64bit 		Iter B1     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER2  	)	$display(" 64bit 		Iter B2     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER1 	)	$display(" 64bit Debug 	Iter B1     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER2 	)	$display(" 64bit Debug 	Iter B2     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER12 	)	$display(" 64bit 		Iter PB     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER3  	)	$display(" 64bit 		Iter B3     data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER3 	)	$display(" 64bit Debug	Iter B3     data transfer %04d",ps2pl_send_cnt);	 
-		else if	(frame_id[15:0] == CMDT_LDL_MatA_INIT    	)   $display(" 128bit 		Init MAT_A  data transfer %04d",ps2pl_send_cnt);
-		else if	(frame_id[15:0] == CMDT_LDL_MatA_T_INIT  	)   $display(" 128bit 		Init MAT_AT data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_LDL_MatA_ITER    	)   $display(" 128bit 		Iter MAT_T  data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_LDL_MatA_T_ITER  	)   $display(" 128bit       Iter MAT_AT data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_LDL_MatA_INIT    	)   $display(" 128bit Debug Init MAT_A  data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_LDL_MatA_T_INIT  	)   $display(" 128bit Debug Init MAT_AT data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_LDL_MatA_ITER    	)   $display(" 128bit Debug Iter MAT_T  data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDTR_LDL_MatA_T_ITER  	)   $display(" 128bit Debug Iter MAT_AT	data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_MatLD_INIT 			)   $display(" 128bit DUMP  Init MAT_L  data transfer %04d",ps2pl_send_cnt);
-		else if	(frame_id[15:0] == CMDT_MatLD_T_INIT 		)   $display(" 128bit DUMP	Init MAT_LT data transfer %04d",ps2pl_send_cnt); 
-		else if	(frame_id[15:0] == CMDT_MatLD_ITER 			)   $display(" 128bit DUMP	Iter MAT_L  data transfer %04d",ps2pl_send_cnt);
-		else if	(frame_id[15:0] == CMDT_MatLD_T_ITER 		)   $display(" 128bit DUMP	Iter MAT_LT data transfer %04d",ps2pl_send_cnt); 
-		else begin
+		if (frame_id[15:0] ==  CMDT_LDL_SIGN)					$display(" %04d bit32  		 sign 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);
+		else if	(frame_id[15:0] ==  CMDT_INFO_MatL_COLNUM )		$display(" %04d bit32  		 col 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);
+		else if	(frame_id[15:0] == CMDT_INFO_MatL_T_COLNUM	)	$display(" %04d bit32  		 row 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);                                                                                    
+		                                                                                                                              					
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT1  	)	$display(" %04d bit64  		 Init B1     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT2  	)   $display(" %04d bit64  		 Init B2     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_INIT1 	)	$display(" %04d bit64  Debug Init B1     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_INIT2 	)	$display(" %04d bit64  Debug Init B2     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER1  	)  	$display(" %04d bit64  		 Iter B1     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER2  	)	$display(" %04d bit64  		 Iter B2     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER1 	)	$display(" %04d bit64  Debug Iter B1     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER2 	)	$display(" %04d bit64  Debug Iter B2     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT12 	)	$display(" %04d bit64  		 Init PB     *** last data_x1 is  %016h data_x2 is  %016h " , ps2pl_send_cnt,last_dat_w128[63:0],last_dat_w128[127:64]); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER12 	)	$display(" %04d bit64  		 Iter PB     *** last data_x1 is  %016h data_x2 is  %016h " , ps2pl_send_cnt,last_dat_w128[63:0],last_dat_w128[127:64]); 
+		else if	(frame_id[15:0] == CMDT_CAL_Vecb_ITER3  	)	$display(" %04d bit64  		 Iter B3     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
+		else if	(frame_id[15:0] == CMDTR_CAL_Vecb_ITER3 	)	$display(" %04d bit64  Debug Iter B3     *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]);	 
+		else if	(frame_id[15:0] == CMDT_LDL_MatA_INIT    	)   $display(" %04d bit128 		 Init MAT_A  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]);
+		else if	(frame_id[15:0] == CMDT_LDL_MatA_T_INIT  	)   $display(" %04d bit128 		 Init MAT_AT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDT_LDL_MatA_ITER    	)   $display(" %04d bit128 		 Iter MAT_T  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDT_LDL_MatA_T_ITER  	)   $display(" %04d bit128		 Iter MAT_AT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDTR_LDL_MatA_INIT    	)   $display(" %04d bit128 Debug Init MAT_A  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDTR_LDL_MatA_T_INIT  	)   $display(" %04d bit128 Debug Init MAT_AT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDTR_LDL_MatA_ITER    	)   $display(" %04d bit128 Debug Iter MAT_T  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDTR_LDL_MatA_T_ITER  	)   $display(" %04d bit128 Debug Iter MAT_AT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDT_MatLD_INIT 			)   $display(" %04d bit128 DUMP  Init MAT_L  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]);
+		else if	(frame_id[15:0] == CMDT_MatLD_T_INIT 		)   $display(" %04d bit128 DUMP	 Init MAT_LT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else if	(frame_id[15:0] == CMDT_MatLD_ITER 			)   $display(" %04d bit128 DUMP	 Iter MAT_L  *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]);
+		else if	(frame_id[15:0] == CMDT_MatLD_T_ITER 		)   $display(" %04d bit128 DUMP	 Iter MAT_LT *** last data row    %08d col %08d dat %016h " , ps2pl_send_cnt,last_dat_w128[31:0],last_dat_w128[63:32],last_dat_w128[128:64]); 
+		else begin                                                                                                                                                                
 			$display("protocol frame id decode error");
 		end
    	endtask
@@ -375,7 +399,7 @@ module tb_env();
 						m_axis_mm2s_tlast = 1'b0;
 						m_axis_mm2s_tvalid= 1'b1; 
 					end 
-				else if (trans_dat128_flag == 1'b1) 
+				else if (trans_dat128_flag == 1'b1 || trans_datP64_flag == 1'b1) 
 					if (i == ps2pl_trans_cnt-1 ) begin
 						data_w128_reverse({buf_w128[(i-1)]},m_axis_mm2s_tdata);
 						m_axis_mm2s_tkeep = 16'hFFFF;
@@ -407,7 +431,8 @@ module tb_env();
 			
 		trans_dat32_flag  = 1'b0;                                                 
 		trans_dat64_flag  = 1'b0;                                                 
-		trans_dat128_flag = 1'b0; 		
+		trans_datP64_flag = 1'b0;
+		trans_dat128_flag = 1'b0; 	
 	endtask
    	
 	task trans_interval;
