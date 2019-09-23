@@ -16,6 +16,7 @@ add wave -noupdate /tb_env/ps2pl_start
 add wave -noupdate /tb_env/pl_clk
 add wave -noupdate /tb_env/pl_resetn
 add wave -noupdate /tb_env/buf_w32
+add wave -noupdate /tb_env/m_axis_mm2s_tready
 add wave -noupdate /tb_env/m_axis_mm2s_tdata
 add wave -noupdate /tb_env/m_axis_mm2s_tkeep
 add wave -noupdate /tb_env/m_axis_mm2s_tlast
@@ -52,4 +53,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {194370064 ps}
+WaveRestoreZoom {9958519 ps} {10124360 ps}

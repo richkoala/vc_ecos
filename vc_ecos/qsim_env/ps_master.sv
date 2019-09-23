@@ -1,29 +1,27 @@
 `timescale 1ns/1ps
-module tb_env();
-
-	reg				pl_clk;
-	reg				pl_resetn;
-  
-	wire [127:0]	S_AXIS_tdata;
-	wire [15:0]		S_AXIS_tkeep;
-	wire 			S_AXIS_tlast;
-	reg 			S_AXIS_tready;
-	wire 			S_AXIS_tvalid;
+module ps_master#( 
+	parameter		string 	file_name  	= ("../data/db/fpga/config.dat"),
+					integer Dem 		= 727,
+					integer PS2PL_SEND_NUM = 82,
+					integer PERIOD      = 10
+				)
+	(
+	input				pl_clk,
+	input				pl_resetn,
 	
-	reg [127:0]		m_axis_mm2s_tdata;
-	reg [15:0]		m_axis_mm2s_tkeep;
-	reg 			m_axis_mm2s_tlast;
-	wire 			m_axis_mm2s_tready;
-	reg 			m_axis_mm2s_tvalid;
+	output reg  [127:0]	m_axis_mm2s_tdata,
+	output reg [15:0]	m_axis_mm2s_tkeep,
+	output reg 			m_axis_mm2s_tlast,
+	input	 			m_axis_mm2s_tready,
+	output reg 			m_axis_mm2s_tvalid,
+	
+	input [127:0]		S_AXIS_tdata,
+	input [15:0]		S_AXIS_tkeep,
+	input 				S_AXIS_tlast,
+	output 				S_AXIS_tready,
+	input 				S_AXIS_tvalid
+	);
 
-	//parameter	kf_num = 1;
-	parameter PERIOD					= 10;
-	parameter Dem = 727;
-	//parameter PS2PL_SEND_NUM			= 82;
-	//localparam file_name 				= {"../data/db/fpga/config_s727.dat"};
-
-	parameter PS2PL_SEND_NUM			= 61;
-	localparam file_name 				= {"../data/db/fpga/config_p727.dat"};	
 	//protocol
 	parameter CMDT_LDL_MatA_INIT    	= 16'h00A0;
 	parameter CMDT_LDL_MatA_T_INIT  	= 16'h00A1;
@@ -132,23 +130,6 @@ module tb_env();
 			$stop(1);
 		end			
 	end	
-
-//clk  
-	initial
-	begin
-		pl_clk <= 1'b0;
-		forever
-		begin
-			#(PERIOD/2) pl_clk <= ~pl_clk;
-		end
-	end   
-//rst	            
-	initial
-	begin
-		pl_resetn			<= 1'b0;  
-		repeat(300) @(posedge pl_clk);
-		pl_resetn			<= 1'b1; 
-	end
 	
 //trans_start	            
 	initial
@@ -176,7 +157,6 @@ module tb_env();
    	begin
    		
    		@(posedge ps2pl_start)
-   		
    		for (ps2pl_send_cnt=1;ps2pl_send_cnt<(PS2PL_SEND_NUM+1);ps2pl_send_cnt=ps2pl_send_cnt+1)
    		begin
    			fid_r 			= $fread(ps2pl_sop_tmp,fid_load, ,1);
@@ -189,7 +169,9 @@ module tb_env();
    		
    		#10000;
    		$stop();
-   	end 
+   	end  
+   	
+   	
    	
    	
    	assign 			sign_0	= (trans_dat32_flag & frame_id[15:0] ==  CMDT_LDL_SIGN )			 ? m_axis_mm2s_tdata[32*1-1:32*0]:32'h0;
@@ -217,7 +199,6 @@ module tb_env();
 		trans_datP64_flag = 1'b0;                                                
 		trans_dat128_flag = 1'b0;                                                 
 	                                                                              
-	
 		frame_id 		= ps2pl_sop[DW*4-1:DW*0];
 		frame_len 		= ps2pl_sop[DW*8-1:DW*4];
 		frame_cnt 		= ps2pl_sop[DW*12-1:DW*8];
@@ -292,7 +273,7 @@ module tb_env();
         //if (disp_en == 1'b1)begin                                       
 		if (frame_id[15:0] ==  CMDT_LDL_SIGN)					$display(" %04d bit32  		 sign 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);
 		else if	(frame_id[15:0] ==  CMDT_INFO_MatL_COLNUM )		$display(" %04d bit32  		 col 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);
-		else if	(frame_id[15:0] == CMDT_INFO_MatL_T_COLNUM	)	$display(" %04d bit32  		 row 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);                                                                                    
+		else if	(frame_id[15:0] == CMDT_INFO_MatL_T_COLNUM	)	$display(" %04d bit32  		 row 	     *** last data    is  %08d  " 					, ps2pl_send_cnt,last_dat_w32);
 		                                                                                                                              					
 		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT1  	)	$display(" %04d bit64  		 Init B1     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
 		else if	(frame_id[15:0] == CMDT_CAL_Vecb_INIT2  	)   $display(" %04d bit64  		 Init B2     *** last data    is  %016h " 					, ps2pl_send_cnt,last_dat_w64); 
@@ -331,94 +312,102 @@ module tb_env();
    		for (i=0;i<ps2pl_trans_cnt;i=i+1)
    		begin
    			@(posedge pl_clk)
-   			if (i==0) begin
-   					m_axis_mm2s_tdata = ps2pl_sop;
-					m_axis_mm2s_tkeep = 16'hFFFF;
-					m_axis_mm2s_tlast = 1'b0;
-					m_axis_mm2s_tvalid= 1'b1;
-				end
-			else begin
-				if (trans_dat32_flag == 1'b1) 
-					if (i == ps2pl_trans_cnt-1 && data_last_num !=0)begin
-						m_axis_mm2s_tdata[127:0] = 128'h0;
-						case(data_last_num/4)
-			            	1:  begin 
-			              		data_w32_reverse(buf_w32[(i-1)*4],m_axis_mm2s_tdata[31:0]);
-								m_axis_mm2s_tkeep = 16'h000F;
-							end
-							2:  begin 
-			              		data_w64_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1]},m_axis_mm2s_tdata[63:0]);
-								m_axis_mm2s_tkeep = 16'h00FF;
-							end
-							3: begin  
-			              		data_w96_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2]},m_axis_mm2s_tdata[95:0]);
-			              		//$display("the dat is %h",{buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2]});
-								m_axis_mm2s_tkeep = 16'h0FFF;
-							end
-			              default: ;
-			
-			              endcase
-			           	m_axis_mm2s_tlast = 1'b1;
-						m_axis_mm2s_tvalid= 1'b1; 
-					end 
-					else if (i == ps2pl_trans_cnt-1 && data_last_num ==0) begin
-						data_w128_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2],buf_w32[(i-1)*4+3]},m_axis_mm2s_tdata);
-						m_axis_mm2s_tkeep = 16'hFFFF;
-						m_axis_mm2s_tlast = 1'b1;
-						m_axis_mm2s_tvalid= 1'b1; 
-						end
-					else
-					begin 
-						data_w128_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2],buf_w32[(i-1)*4+3]},m_axis_mm2s_tdata);
-						m_axis_mm2s_tkeep = 16'hFFFF;
-						m_axis_mm2s_tlast = 1'b0;
-						m_axis_mm2s_tvalid= 1'b1; 
-					end
-				else if (trans_dat64_flag == 1'b1)
-					if (i == ps2pl_trans_cnt-1 && data_last_num !=0)begin
-						m_axis_mm2s_tdata[127:0] = 128'h0;
-						case(data_last_num/8)
-			            	1:  begin 
-			              		data_w64_reverse(buf_w64[(i-1)*4],m_axis_mm2s_tdata[63:0]);
-								m_axis_mm2s_tkeep = 16'h000F;
-							end
-			              default: ;
-			              endcase
-			           	m_axis_mm2s_tlast = 1'b1;
-						m_axis_mm2s_tvalid= 1'b1; 
-					end 
-					else if (i == ps2pl_trans_cnt-1 && data_last_num ==0) begin
-						data_w128_reverse({buf_w64[(i-1)*2],buf_w64[(i-1)*2+1]},m_axis_mm2s_tdata);
-						m_axis_mm2s_tkeep = 16'hFFFF;
-						m_axis_mm2s_tlast = 1'b1;
-						m_axis_mm2s_tvalid= 1'b1; 
-						end
-					else begin 
-						data_w128_reverse({buf_w64[(i-1)*2],buf_w64[(i-1)*2+1]},m_axis_mm2s_tdata);
-						m_axis_mm2s_tkeep = 16'hFFFF;
-						m_axis_mm2s_tlast = 1'b0;
-						m_axis_mm2s_tvalid= 1'b1; 
-					end 
-				else if (trans_dat128_flag == 1'b1 || trans_datP64_flag == 1'b1) 
-					if (i == ps2pl_trans_cnt-1 ) begin
-						data_w128_reverse({buf_w128[(i-1)]},m_axis_mm2s_tdata);
-						m_axis_mm2s_tkeep = 16'hFFFF;
-						m_axis_mm2s_tlast = 1'b1;
-						m_axis_mm2s_tvalid= 1'b1; 
-					end
-					else begin
-						data_w128_reverse({buf_w128[(i-1)]},m_axis_mm2s_tdata);
+   			if (m_axis_mm2s_tready == 1'b1) begin
+	   			if (i==0) begin
+	   					m_axis_mm2s_tdata = ps2pl_sop;
 						m_axis_mm2s_tkeep = 16'hFFFF;
 						m_axis_mm2s_tlast = 1'b0;
 						m_axis_mm2s_tvalid= 1'b1;
 					end
 				else begin
-						m_axis_mm2s_tdata = 128'h0;
-						m_axis_mm2s_tkeep = 16'h0;
-						m_axis_mm2s_tlast = 1'b0;
-						m_axis_mm2s_tvalid= 1'b0;
-				end
-					
+					if (trans_dat32_flag == 1'b1) 
+						if (i == ps2pl_trans_cnt-1 && data_last_num !=0)begin
+							m_axis_mm2s_tdata[127:0] = 128'h0;
+							case(data_last_num/4)
+				            	1:  begin 
+				              		data_w32_reverse(buf_w32[(i-1)*4],m_axis_mm2s_tdata[31:0]);
+									m_axis_mm2s_tkeep = 16'h000F;
+								end
+								2:  begin 
+				              		data_w64_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1]},m_axis_mm2s_tdata[63:0]);
+									m_axis_mm2s_tkeep = 16'h00FF;
+								end
+								3: begin  
+				              		data_w96_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2]},m_axis_mm2s_tdata[95:0]);
+				              		//$display("the dat is %h",{buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2]});
+									m_axis_mm2s_tkeep = 16'h0FFF;
+								end
+				              default: ;
+				
+				              endcase
+				           	m_axis_mm2s_tlast = 1'b1;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end 
+						else if (i == ps2pl_trans_cnt-1 && data_last_num ==0) begin
+							data_w128_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2],buf_w32[(i-1)*4+3]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b1;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end
+						else begin 
+							data_w128_reverse({buf_w32[(i-1)*4],buf_w32[(i-1)*4+1],buf_w32[(i-1)*4+2],buf_w32[(i-1)*4+3]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b0;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end
+					else if (trans_dat64_flag == 1'b1)
+						if (i == ps2pl_trans_cnt-1 && data_last_num !=0)begin
+							m_axis_mm2s_tdata[127:0] = 128'h0;
+							case(data_last_num/8)
+				            	1:  begin 
+				              		data_w64_reverse(buf_w64[(i-1)*2],m_axis_mm2s_tdata[63:0]);
+									m_axis_mm2s_tkeep = 16'h00FF;
+								end
+				              default: ;
+				              endcase
+				           	m_axis_mm2s_tlast = 1'b1;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end 
+						else if (i == ps2pl_trans_cnt-1 && data_last_num ==0) begin
+							data_w128_reverse({buf_w64[(i-1)*2],buf_w64[(i-1)*2+1]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b1;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end
+						else begin 
+							data_w128_reverse({buf_w64[(i-1)*2],buf_w64[(i-1)*2+1]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b0;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end 
+					else if (trans_dat128_flag == 1'b1 || trans_datP64_flag == 1'b1) 
+						if (i == ps2pl_trans_cnt-1 ) begin
+							data_w128_reverse({buf_w128[(i-1)]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b1;
+							m_axis_mm2s_tvalid= 1'b1; 
+						end
+						else begin
+							data_w128_reverse({buf_w128[(i-1)]},m_axis_mm2s_tdata);
+							m_axis_mm2s_tkeep = 16'hFFFF;
+							m_axis_mm2s_tlast = 1'b0;
+							m_axis_mm2s_tvalid= 1'b1;
+						end
+					else begin
+							m_axis_mm2s_tdata = 128'h0;
+							m_axis_mm2s_tkeep = 16'h0;
+							m_axis_mm2s_tlast = 1'b0;
+							m_axis_mm2s_tvalid= 1'b0;
+						end
+					end
+				end		
+				
+			else begin
+				i = i-1;
+				m_axis_mm2s_tdata = m_axis_mm2s_tdata; 
+				m_axis_mm2s_tkeep = m_axis_mm2s_tkeep; 
+				m_axis_mm2s_tlast = m_axis_mm2s_tlast; 
+				m_axis_mm2s_tvalid= m_axis_mm2s_tvalid;
 			end
 		end
 		

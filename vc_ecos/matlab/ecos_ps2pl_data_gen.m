@@ -3,15 +3,15 @@ clear all
 close all
 fclose all
 
-dem = 727;
+dem = 757;
 
 path_data_db = '../data/db/fpga';
 file_start_idx = 1;
 files          = dir(path_data_db);
 
-file_config = '../data/db/fpga/config_p727.dat';
+file_config = '../data/din/config.dat';
 if (exist(file_config,'file'))
-    system('del ..\data\db\fpga\config_p727.dat');
+    system('del ..\data\din\config.dat');
 end
 
 fid_config = fopen(file_config,'ab');

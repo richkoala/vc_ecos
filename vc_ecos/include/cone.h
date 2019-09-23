@@ -26,9 +26,13 @@
 #include "glblopts.h"
 #include "expcone.h"
 
-#define CONEMODE (1)  /* 0: expand to sparse cones (ECOS standard)       */
+#ifdef CONE_SPARSE
+#define CONEMODE (0)  /* 0: expand to sparse cones (ECOS standard)       */
                       /* 1: dense cones (slow for big cones)             */
                       /* 2: dense of fixed size                          */
+#else
+#define CONEMODE (1) 
+#endif
 
 
 /* LP CONE ------------------------------------------------------------- */

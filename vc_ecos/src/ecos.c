@@ -342,13 +342,14 @@ idxint init(pwork* w)
 	dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);*/
 
 	//sparse matrix inverse
-	sprintf(fn_1, "%sdb/fpga/MatA_T_sparse_init%02i.txt",DATA_PATH,0);
+	sprintf(fn_1, "%sdb/fpga/MatA_init%02i.txt",DATA_PATH,0);
 	sprintf(fn_2, "%sdb/fpga/MatA_T_init%02i.txt",DATA_PATH,0);	
 	MtoMt = MALLOC(w->KKT->PKPt->nnz*sizeof(idxint));
 	Mat_T = transposeSparseMatrix(w->KKT->PKPt, MtoMt);
 	Spmat2Demat(Mat_T, DeM);
-//	dumpSparseMatrix(Mat_T, fn_1);
-	dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
+	dumpSparseMatrix(w->KKT->PKPt, fn_1);
+	dumpSparseMatrix(Mat_T, fn_2);
+	//dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
 
 	#if DEBUG > 0
 	sprintf(fn_1,"%sdb/PKPt_solve_init.txt",DATA_PATH);
@@ -1279,11 +1280,6 @@ idxint ECOS_solve(pwork* w)
 #endif
 
 
-#if CONEMODE == 0
-    nK += 2*w->C->nsoc;
-#endif
-
-
 #ifdef EXPCONE
     idxint fc = w->C->fexv; /* First cone variable e */
     idxint k;
@@ -1300,6 +1296,10 @@ idxint ECOS_solve(pwork* w)
 #endif
 #if PROFILING > 1
     timer tfactor, tkktsolve;
+#endif
+
+#if CONEMODE == 0
+    nK += 2*w->C->nsoc;
 #endif
 
 #if defined EQUILIBRATE && EQUILIBRATE > 0
