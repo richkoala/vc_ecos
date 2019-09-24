@@ -182,7 +182,7 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 		sprintf(fn_1, "%sdb/fpga/HW_MatA_FRAME_ITER%02i.txt",DATA_PATH, iter_num);
 		sprintf(fn_2, "%sdb/fpga/HW_SIGN_FRAME_ITER%02i.txt",DATA_PATH, iter_num);
 	}
-	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,fn_1);
+	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,KKT->PKPt->m,fn_1);
 	dumpVec_hw_imp(Vec_Sign,1,KKT->PKPt->n,fn_2);
 	#endif
 
@@ -193,7 +193,7 @@ idxint kkt_factor(kkt* KKT, pfloat eps, pfloat delta)
 	else{
 		sprintf(fn_1, "%sdb/fpga/PS2PL_send%04d_MatA_FRAME_ITER%02i.txt",DATA_PATH, *PS2PL_trans_cnt,iter_num);
 	}
-	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,fn_1);
+	dumpDemat_hw_imp(DeM_A,MatA_sop_len,KKT->PKPt->nnz,KKT->PKPt->m,fn_1);
 	#endif
 
 
@@ -295,6 +295,11 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 #if KKT_SOVLE_PL_PROCESS == 0
 		/* forward - diagonal - backward solves: Px holds solution */
 
+//	if (*PS2PL_trans_cnt==74)
+//	{
+//		sprintf(fn, "%sdb/fpga/solve_b%i_iter%02i.txt",DATA_PATH,idx_b, iter_cnt);
+//	}
+
 	#if PROFILING == 3
 
 	LDL_lsolve2(nK, Pb, KKT->L->jc, KKT->L->ir, KKT->L->pr, Px, ldl_lsolve2_cnt,ldl_lsolve2_time);
@@ -329,13 +334,9 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 	if (isinit==0){
 		sprintf(fn, "%sdb/fpga/solve_bx%i_iter%02i.txt",DATA_PATH,idx_b, iter_cnt);
 		dumpDenseMatrix(Px,nK, 1, fn);
-		sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_ITER%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt);
-		dumpDenseMatrix(Px,nK, 1, fn);
 	}
 	else{
 		sprintf(fn, "%sdb/fpga/solve_bx%i_init%02i.txt",DATA_PATH,idx_b,0);
-		dumpDenseMatrix(Px,nK, 1, fn);
-		sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0);
 		dumpDenseMatrix(Px,nK, 1, fn);
 	}
 	#endif
@@ -386,13 +387,21 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 
 	#if PROFILING == 3
 	#if DEBUG == 1
+
+	if (isinit==0){
+		sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_ITER%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt);
+	}
+	else{
+		sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0);
+	}
+	dumpDenseMatrix(Px,nK, 1, fn);
+
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,idx_b, 0);
 	else
 		sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_ITER%02i.txt",DATA_PATH,idx_b, iter_cnt);
 	dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
 
-	
 	if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
 		sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_INIT%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0);
 	else
@@ -566,20 +575,16 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 		}
 		else{
 			sprintf(fn, "%sdb/fpga/solve_dx%i_init%02irefine%02i.txt",DATA_PATH,idx_b, 0,kItRef);
-			dumpDenseMatrix(Px,nK, 1, fn);
+			dumpDenseMatrix(dPx,nK, 1, fn);
 		}
 
         LDL_ltsolve(nK, dPx, KKT->L->jc, KKT->L->ir, KKT->L->pr,ldl_ltsolve_cnt,ldl_ltsolve_time);
 		if (isinit==0){
 			sprintf(fn, "%sdb/fpga/solve_bx%i_iter%02i_refine%02i.txt",DATA_PATH,idx_b, iter_cnt,kItRef);
 			dumpDenseMatrix(dPx,nK, 1, fn);
-			sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt,kItRef);
-			dumpDenseMatrix(dPx,nK, 1, fn);
 		}
 		else{
 			sprintf(fn, "%sdb/fpga/solve_bx%i_init%02i_refine%02i.txt",DATA_PATH, idx_b, 0,kItRef);
-			dumpDenseMatrix(dPx,nK, 1, fn);
-			sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_init%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0,kItRef);
 			dumpDenseMatrix(dPx,nK, 1, fn);
 		}
         #else
@@ -627,16 +632,26 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 				PL2PS_trans_cnt);
 
 #if PROFILING == 3
+		#if DEBUG==1
+		if (isinit==0){
+			sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt,kItRef);
+		}
+		else{
+			sprintf(fn, "%sdb/fpga/PS_SOLVE_BX%04d_Vecb%i_FRAME_init%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0,kItRef);
+			
+		}
+		dumpDenseMatrix(dPx,nK, 1, fn);
+
 		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
-			sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_INIT%02i_refine%02i.txt",DATA_PATH,idx_b, 0,nitref);
+			sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_INIT%02i_refine%02i.txt",DATA_PATH,idx_b, 0,kItRef);
 		else
-			sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,idx_b, iter_cnt,nitref);
+			sprintf(fn, "%sdb/fpga/HW_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,idx_b, iter_cnt,kItRef);
 		dumpDevec_hw_imp(Pe,1, Vecb_dem, fn);
 
 		if (frame_id == CMDT_CAL_Vecb_INIT1 || frame_id == CMDT_CAL_Vecb_INIT2 || frame_id ==CMDT_CAL_Vecb_INIT12)
-			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_INIT%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0,nitref);
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_INIT%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, 0,kItRef);
 		else
-			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt,nitref);
+			sprintf(fn, "%sdb/fpga/PS2PL_send%04d_Vecb%i_FRAME_ITER%02i_refine%02i.txt",DATA_PATH,*PS2PL_trans_cnt,idx_b, iter_cnt,kItRef);
 		dumpDevec_hw_imp(Vec_b,1, Vecb_dem, fn);
 
 		/* 硬件输出时使用，后续调试
@@ -646,6 +661,7 @@ idxint kkt_solve(idxint idx_b,kkt* KKT, spmat* A, spmat* G, pfloat* Pb, pfloat* 
 			sprintf(fn, "%sdb/fpga/HW_Vecx_FRAME_ITER%02i_cnt%02i.txt",DATA_PATH, iter_cnt,*ldl_ltsolve_cnt);
 		dumpDevec_hw_imp(Vec_b,1, Vecx_dem, fn);
 		*/
+		#endif
 #endif
 
 #endif

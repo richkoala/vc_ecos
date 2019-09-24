@@ -107,7 +107,7 @@ void Spmat2Demat(spmat* SpM,demat* DeM);
 void dumpDemat(demat* M, idxint len,char* fn);
 
 void Spmat2Demat_hw_imp(spmat* SpM,demat_struct* DeM, idxint idx);
-void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len,char* fn);
+void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len, idxint dem ,char* fn);
 void dumpDevec_hw_imp(devec_struct* M, idxint cmd_len, idxint data_len,char* fn);
 void dumpVec_hw_imp(int* M, idxint cmd_len, idxint data_len,char* fn);
 

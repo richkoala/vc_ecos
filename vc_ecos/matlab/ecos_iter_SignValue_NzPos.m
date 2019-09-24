@@ -3,7 +3,7 @@ clc
 clear all
 close all
 
-dem = 727;
+dem = 757;
 iter_num = 11;
 sign_num = iter_num+2;
 matL_num = iter_num+2;
@@ -25,7 +25,7 @@ path_col_data   = '../data/db/fpga/';
             end
         end
 
-            sign_struct = func_decode_vector_1(sign_data_idx,'%d','%f');   %sop-type data-type
+            sign_struct = func_decode_ps2pl_vector_sign(sign_data_idx);   %sop-type data-type
             sign_data_all(:,i) = sign_struct.vector;
    
     end
@@ -65,8 +65,8 @@ path_col_data   = '../data/db/fpga/';
     
 
  %% MAT_L 矩阵非零位置参数数值
-    matL_col_all      = zeros(dem,matL_num);
-    matL_col_cmp_flag = zeros(dem,matL_num-1);
+    matL_col_all      = zeros(dem+1,matL_num);
+    matL_col_cmp_flag = zeros(dem+1,matL_num-1);
     for i = 1:matL_num
         if (i==1)
             matl_col_idx = strcat(path_col_data,'MatL_COL_PS2PL.txt');
@@ -78,10 +78,10 @@ path_col_data   = '../data/db/fpga/';
         end
         
         if (i==1)
-            col_struct = func_decode_vector_1(matl_col_idx,'%d','%d');   %sop-type data-type
+            col_struct = func_decode_ps2pl_vector_colcumsum(matl_col_idx);   %sop-type data-type
             matL_col_all(:,i) = col_struct.vector;
         else
-            col_vector = func_decode_vector_2(matl_col_idx,'%d');   %sop-type data-type
+            col_vector = func_decode_vector_colcumsum(matl_col_idx);   %sop-type data-type
             matL_col_all(:,i)  = col_vector;
         end
     end
@@ -96,6 +96,7 @@ path_col_data   = '../data/db/fpga/';
         disp('matL col cumsum changed ');
     end
 
+   fclose all;
 
 
 

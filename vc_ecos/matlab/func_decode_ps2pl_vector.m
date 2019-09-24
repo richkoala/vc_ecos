@@ -1,0 +1,19 @@
+function [vector,s] = func_decode_ps2pl_vector(filename,format1,format2)
+    fid = fopen(filename);
+    tmp = fscanf(fid,format1,4);
+    frame_id = tmp(1);
+    len      = tmp(2);
+    cnt      = tmp(3);
+    iter_cnt = tmp(4);
+    tmp = fscanf(fid,format2,Inf);
+    vector   = tmp(1:end-3);
+    s = struct( ...
+    'frame_id' , frame_id ...
+    ,'len' , len ...
+    ,'cnt' , cnt ...
+    ,'iter_cnt' , iter_cnt ...
+    ,'vector', vector ...
+    );
+    vector = s.vector;
+    fclose all;
+end

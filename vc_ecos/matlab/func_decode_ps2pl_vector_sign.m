@@ -1,11 +1,11 @@
-function s = func_decode_vector_1(filename,format1,format2)
+function s = func_decode_ps2pl_vector_sign(filename)
     fid = fopen(filename);
-    tmp = fscanf(fid,format1,4);
+    tmp = fscanf(fid,'%d',4);
     frame_id = tmp(1);
     len      = tmp(2);
     cnt      = tmp(3);
     iter_cnt = tmp(4);
-    tmp = fscanf(fid,format2,Inf);
+    tmp = fscanf(fid,'%f',Inf);
     vector   = tmp(1:end-3);
     s = struct( ...
     'frame_id' , frame_id ...

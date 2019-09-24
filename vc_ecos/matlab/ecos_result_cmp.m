@@ -11,10 +11,10 @@ double_byte_len = 8;
 result_len = n+p+m+m+m+1+1;
 
 fid_arm_result 	= fopen(strcat(path_result,'arm_result_normal_1.bin'),'rb');
-fid_arm_x 	= fopen(strcat(path_result,'arm_x_normal_1.bin'),'rb');
-fid_arm_y 	= fopen(strcat(path_result,'arm_y_normal_1.bin'),'rb');
-fid_arm_z 	= fopen(strcat(path_result,'arm_z_normal_1.bin'),'rb');
-fid_arm_s 	= fopen(strcat(path_result,'arm_s_normal_1.bin'),'rb');
+fid_arm_x       = fopen(strcat(path_result,'arm_x_normal_1.bin'),'rb');
+fid_arm_y       = fopen(strcat(path_result,'arm_y_normal_1.bin'),'rb');
+fid_arm_z       = fopen(strcat(path_result,'arm_z_normal_1.bin'),'rb');
+fid_arm_s       = fopen(strcat(path_result,'arm_s_normal_1.bin'),'rb');
 fid_arm_lambda 	= fopen(strcat(path_result,'arm_lambda_normal_1.bin'),'rb');
 fid_arm_tau 	= fopen(strcat(path_result,'arm_tau_normal_1.bin'),'rb');
 fid_arm_kap 	= fopen(strcat(path_result,'arm_kap_normal_1.bin'),'rb');
@@ -47,7 +47,6 @@ arm_s = fread(fid_arm_s,m,'double','ieee-le.l64');
 arm_lambda = fread(fid_arm_lambda,m,'double','ieee-le.l64');
 arm_kap = fread(fid_arm_kap,1,'double','ieee-le.l64');
 arm_tau = fread(fid_arm_tau,1,'double','ieee-le.l64');
-
 
 
 vc_x 		= fscanf(fid_vc_x		,'%e',inf);

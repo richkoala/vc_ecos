@@ -396,7 +396,7 @@ idxint init(pwork* w)
 		sprintf(fn_1, "%sdb/fpga/MatL_init00.txt",DATA_PATH);
 		dumpSparseMatrix(w->KKT->L, fn_1);
 		sprintf(fn_1, "%sdb/fpga/MatL_col_cumsum_init00.txt",DATA_PATH);
-		dumpDenseMatrix_i_UD(w->KKT->L->jc,w->KKT->PKPt->n,1, fn_1);
+		dumpDenseMatrix_i_UD(w->KKT->L->jc,(w->KKT->PKPt->n+1),1, fn_1);
 		sprintf(fn_1, "%sdb/fpga/MatD_init00.txt",DATA_PATH);
 		dumpDenseMatrix_UD(w->KKT->D,w->KKT->PKPt->n,1,fn_1);
 #endif
@@ -1541,7 +1541,8 @@ idxint ECOS_solve(pwork* w)
 		Mat_T = transposeSparseMatrix(w->KKT->PKPt, MtoMt);
 		Spmat2Demat(Mat_T, DeM);
 //		dumpSparseMatrix(Mat_T, fn_1);
-		dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
+		dumpSparseMatrix(Mat_T,fn_2);
+		//dumpDemat(DeM, w->KKT->PKPt->nnz,fn_2);
 		free(MtoMt);
 		free(Mat_T);
 		free(DeM);
@@ -1591,7 +1592,7 @@ idxint ECOS_solve(pwork* w)
 		sprintf(fn, "%sdb/fpga/MatL_iter%02i.txt",DATA_PATH,(int)w->info->iter);
 		dumpSparseMatrix(w->KKT->L, fn);
 		sprintf(fn, "%sdb/fpga/MatL_col_cumsum_iter%02i.txt",DATA_PATH,(int)w->info->iter);
-		dumpDenseMatrix_i_UD(w->KKT->L->jc,w->KKT->PKPt->n,1, fn);
+		dumpDenseMatrix_i_UD(w->KKT->L->jc,(w->KKT->PKPt->n+1),1, fn);
 
 
 		sprintf(fn, "%sdb/fpga/MatD_iter%02i.txt",DATA_PATH,(int)w->info->iter);

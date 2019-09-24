@@ -1,11 +1,7 @@
 clc
 clear all
 close all
-row_len = 727;
-col_len = 727;
-n         =      255;
-p         =      210;
-m         =      262;
+
 iter_num  =      10;
 
 path = '../data/db/Con_exit/'
@@ -36,7 +32,7 @@ for iter_cnt = 1:iter_num
     con4 = s'*z;
     con5 = s'*z/ro;
     
-    disp(sprintf('iter_num: %d\t tau: %e\t ro: %e\t, kap:%e\t con1: %e\t con2: %e\t con3: %e\t con4: %e\t con5: %e\t',...
-                    iter_num,      tau,      ro,       kap,     con1,con2,con3,con4,con5 )...
+    disp(sprintf('iter_num: %5d\t tau: %e\t ro: %e\t, kap:%e\t con1: %e\t con2: %e\t con3: %e\t con4: %e\t con5: %e\t',...
+                    iter_cnt,      tau,      ro,       kap,     con1,con2,con3,con4,con5 )...
                   );
 end

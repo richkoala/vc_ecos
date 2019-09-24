@@ -286,7 +286,7 @@ void dumpDemat(demat* M, idxint len,char* fn)
 }
 
 //转化后发送给pl的数据dump处理
-void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len,char* fn)
+void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len, idxint dem ,char* fn)
 {
 #if DEBUG == 1
 	idxint i = 0;
@@ -303,7 +303,7 @@ void dumpDemat_hw_imp(demat_struct* M, idxint cmd_len, idxint data_len,char* fn)
 		for(i=cmd_len; i<cmd_len+data_len; i++){               
 			fprintf(f,"%d\t%d\t%20.18lf\n", (int)M[i].frame_id_or_row, (int)M[i].frame_len_or_col, M[i].double_data2);
 		}
-        fprintf(f,"%d\t%d\t%20.18e\n", cmd_len+data_len, cmd_len+data_len, 0.0);
+        fprintf(f,"%d\t%d\t%20.18e\n", dem, cmd_len+data_len, 0.0);
 		fclose(f);
 		PRINTTEXT("File %s successfully written.\n", fn);
 	} else {

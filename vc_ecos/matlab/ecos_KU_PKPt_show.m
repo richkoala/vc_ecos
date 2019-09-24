@@ -2,8 +2,8 @@ clc
 clear all
 close all
 
-row_len = 727;
-col_len = 727;
+row_len = 757;
+col_len = 757;
 
 path = '../data/db/';
 
